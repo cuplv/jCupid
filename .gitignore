@@ -1,7 +1,10 @@
-# attempt to ignore extension-less files, these will be used as output and run specific.
+# ignore extension-less files, they will be used for output
 *
 !/**/
 !*.*
+
+# ignore anything in the outputFiles directory
+outputFiles
 
 *.class
 # ignore swap files from vim
