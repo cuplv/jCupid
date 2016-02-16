@@ -1,4 +1,6 @@
 *.class
+# ignore swap files from vim
+*.swp
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
