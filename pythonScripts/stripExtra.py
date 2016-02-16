@@ -19,14 +19,14 @@ if(len(sys.argv) < 2):
 
 # first we compile the program with the debug compiler
 # we need to add the -d flag and the "." so that we create the .class file in the local directory. will be cleaned up later
-p1 = subprocess.Popen([debugJavac,"-d",".",sys.argv[1]],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+p1 = subprocess.Popen([debugJavac,"-d","/tmp/",sys.argv[1]],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
 p1.communicate()
 
 # now we run the debug JVM with the flags in order to get the bytecode trace
 
 # first we extract the class name. We find the last / and the .java, everything between should be the className
 className= sys.argv[1][sys.argv[1].rfind("/")+1:sys.argv[1].find(".java")]
-p2 = subprocess.Popen([debugJava,"-XX:+TraceBytecodes","-Xint",className],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+p2 = subprocess.Popen([debugJava,"-classpath","/tmp/","-XX:+TraceBytecodes","-Xint",className],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
 so, se = p2.communicate()
 if se:
     se = se.split("\n")
@@ -40,13 +40,8 @@ if se:
 so = so.split("\n")
 
 if(len(sys.argv) < 3):
-    print("Must have a third argument, method name to look for.")
+    print("Must have a second argument, method name to look for.")
     sys.exit()
-
-f = open("tmp",'w')
-for item in so:
-    f.writelines("%s\n" %item)
-f.close()
 
 # search the output for the phrase className.methodName
 phrase = className + "." + sys.argv[2]
@@ -59,14 +54,50 @@ try:
 except StopIteration:
     print("Could not find " + phrase + " in the output, are you sure the function is called?")
 else:
-    data = so[first:second+2]
-    print("first = " + str(first))
-    print("so[first] = " + so[first])
-    print("data[0] = " + data[0])
-    print("second = " + str(second))
-    print("data[-1] = " + data[-1])
-    print("so[second+1] = " + so[second+1])
-    print("data[-3] = " + data[-3])
-    print("len(data[-3]) = " + str(len(data[-3])))
-    print("len(data) = " + str(len(data)))
-    print("data.count('') = " + str(data.count("")))
+    # data will be all the lines we care about.
+    data = []
+    try:
+        stop = so[second:].index("")
+    except ValueError:
+        print("Weird error, could not find an empty string after last return")
+    else:
+        data = so[first:stop+second]
+    
+    f = open("/tmp/out",'w')
+    for item in data:
+        f.writelines("%s\n" %item)
+    f.close()
+
+    # now we format the output
+    outFile = open("/tmp/out1","w")
+    p3 = subprocess.Popen(["sed","s/\[[0-9]*\]//","/tmp/out"],stdin=subprocess.PIPE,stdout=outFile,stderr=subprocess.PIPE)
+    sedo1,sede1 = p3.communicate()
+    outFile.close()
+    if sede1:
+        sede1=sede1.split("\n")
+        # we're in here if something went wrong with sed
+        print("There was an error running sed on your output: ")
+        for e in sede1:
+            print(e)
+        printf("Script will continue, but depending on error may have unexpected results")
+
+    # if the user supplies 3 arguments then the last is assumed to be the file name to save results to.
+    if (len(sys.argv) >= 4):
+        outFile = open(sys.argv[3],"w")
+    else:
+        outFile = open("output","w")
+
+    p4 = subprocess.Popen(["sed","s/\s\+[0-9]*//","/tmp/out1"],stdin=subprocess.PIPE,stdout=outFile,stderr=subprocess.PIPE)
+    sedo2,sede2 = p4.communicate()
+    outFile.close()
+    if sede2:
+        sede2=sede2.split("\n")
+        # we're in here if something went wrong with sed
+        print("There was an error running sed on your output: ")
+        for e in sede2:
+            print(e)
+
+
+# now add sed commands, in particular "sed/\[[0-9]*\]//" <tmp > tmp1
+# then another sed to remove numbers: "sed/\s+[0-9]*//" <tmp1 > tmp
+
