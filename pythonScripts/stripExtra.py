@@ -87,7 +87,7 @@ else:
     else:
         outFile = open("output","w")
 
-    p4 = subprocess.Popen(["sed","s/\s\+[0-9]*//","/tmp/out1"],stdin=subprocess.PIPE,stdout=outFile,stderr=subprocess.PIPE)
+    p4 = subprocess.Popen(["sed","s/\s\+[0-9]\+//","/tmp/out1"],stdin=subprocess.PIPE,stdout=outFile,stderr=subprocess.PIPE)
     sedo2,sede2 = p4.communicate()
     outFile.close()
     if sede2:
