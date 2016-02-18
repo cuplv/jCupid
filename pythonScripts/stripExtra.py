@@ -6,11 +6,11 @@ desired function (second input to this script). Finally it will remove the proce
 
 The script assumes a number of arguments:
 
-The first is the location of the java file to compile.
+The first is the name (including path to it) of the java file to compile.
 The second is the class we are interested in.
 The third is the name of the method we are interested in.
 The fourth (if entered) is the input file to read inputs from.
-The fifth (if entered) is the output file to write results to.
+The fifth (if entered) is the output file to write results to, if none given then prints to stdout
 """
 
 
@@ -74,10 +74,10 @@ def cleanData(data):
     """This function will clean up the data to remove process id and overall bytecodes run"""
 
     # now we format the output: first remove process id -
-    data = [re.sub(r'\[[0-9]*\]','',s,1) for s in data]
+    data = [re.sub(r'\[[0-9]*\]\s+[0-9]*','',s) for s in data]
 
     # now remove overall bytecodes run:
-    data = [re.sub(r'\s+[0-9]+','',s,1) for s in data]
+    # data = [re.sub(r'\s+[0-9]+','',s,1) for s in data]
 
     return data
 
@@ -96,20 +96,19 @@ def main():
         sys.exit()
 
     iFile = []
-    if(len(sys.argv) < 5):
-        print("No input file given, no input given to program.")
-    else:
+    if(len(sys.argv) >= 5):
         try:
             iFile = open(sys.argv[4],"r").readlines()
         except IOError as e:
-            print("Couldn't open file: "+sys.argv[4])
-            print("Got this error:")
-            print(e)
-            print("Script will continue as if there were no input file")
+            sys.stderr.write("Couldn't open file: "+sys.argv[4]+ "\n")
+            sys.stderr.write("Got this error:\n")
+            sys.stderr.write(e)
+            sys.stderr.write("\n")
+            sys.stderr.write("Script will continue as if there were no input file\n")
             iFile = []
 
     if (len(sys.argv) < 6):
-        oFile = open("output","w")
+        oFile = sys.stdout 
     else:
         oFile = open(sys.argv[5],"w")
 
