@@ -16,8 +16,6 @@ public class SumBytes
         for(int i: bArray)
             sum += i;
 
-        System.out.println("sum = " + sum);
-
         MessageDigest md = null;
 
         try
