@@ -62,11 +62,14 @@ def findDiffs(toDo):
 
 
             if so: # there was a difference, so write it to a file
+                p = subprocess.Popen(["diff","--side-by-side","out{:d}".format(curr),"out{:d}".format(i)],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+                so,se = p.communicate()
                 so = so.split("\n")
                 f = open("diff{:d}-{:d}".format(curr,i),"w")
                 sys.stderr.write("There was a difference between runs {:d} and {:d}, saving the diff\n".format(curr,i))
-                f.write(so)
-                f.write("\n")
+                for s in so:
+                    f.write(s)
+                    f.write("\n")
                 f.close()
             else: # there was no error, so skip it
                 toSkip.append(i)
