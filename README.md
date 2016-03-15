@@ -9,7 +9,7 @@ This will require building OpenJDK with certain flags, thus you must obtain the 
 
 ```
 hg clone http://hg.openjdk.java.net/jdk8/jdk8 YourOpenJDK 
-cd *YourOpenJDK* 
+cd _YourOpenJDK_ 
 bash ./get_source.sh
 ```
 
@@ -19,7 +19,7 @@ After the source code is obtained we need to configure the build. For building O
 
 Now we can configure:
 ```
-cd *YourOpenJDK*
+cd _YourOpenJDK_
 bash ./configure --enable-debug --with-target-bits=64
 ```
 
