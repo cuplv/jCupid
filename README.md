@@ -4,41 +4,43 @@
 
 ### OpenJDK
 
-#### Obtaining source code:
+### Obtaining source code:
 This will require building OpenJDK with certain flags, thus you must obtain the code, this is done with Mercurial:
 
-<pre>
+```bash
 hg clone http://hg.openjdk.java.net/jdk8/jdk8 YourOpenJDK 
-cd <i>YourOpenJDK</i> 
+cd YourOpenJDK
 bash ./get_source.sh
-</pre>
+```
 
 #### Configuring
 After the source code is obtained we need to configure the build. For building OpenJDK8 we will need a version of JDK7 that is Update 7 or newer. You can go [here](http://www.oracle.com/technetwork/java/javase/downloads/index.html) to obtain JDK 7. 
 
 Now we can configure:
-<pre>
-cd <i>YourOpenJDK</i>
+
+```bash
+cd YourOpenJDK
 bash ./configure --enable-debug --with-target-bits=64
-</pre>
+```
 
 #### Making
 Easiest part:
 
-```
+```bash
 make all
 ```
 
 ## How to use tool:
 
 Main use is through the diffRuns.py script. It has a number of necessary flags: 
-<pre>
+
+```
 -f  -   path to java file to run, can be relative.
 -n  -   class name to find a difference around.
 -m  -   method name to find a difference around.
--r  -   number of times to run each file, this is not <i> necessary</i> but encouraged, without it each file will be run 20 times!
+-r  -   number of times to run each file, this is not  necessary but encouraged, without it each file will be run 20 times!
 -i  -   designates a file to read input from, this flag is needed before each filename!
-</pre>
+```
 
 With this we can run our tool:
 `./diffRuns.py -f ../SumRandomBytes.java -n SumRandomBytes -m main -r 1 -i inp -i inp1`
