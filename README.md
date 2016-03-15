@@ -31,6 +31,28 @@ Easiest part:
 make all
 ```
 
+## How to use tool:
+
+Main use is through the diffRuns.py script. It has a number of necessary flags: 
+<pre>
+-f  -   path to java file to run, can be relative.
+-n  -   class name to find a difference around.
+-m  -   method name to find a difference around.
+-r  -   number of times to run each file, this is not <i> necessary</i> but encouraged, without it each file will be run 20 times!
+-i  -   designates a file to read input from, this flag is needed before each filename!
+</pre>
+
+With this we can run our tool:
+`./diffRuns.py -f ../SumRandomBytes.java -n SumRandomBytes -m main -r 1 -i inp -i inp1`
+
+We assume for the above that we are in the pythonScripts folder, and that inp and inp1 exist. If inp contains `hello` and inp1 contains `inp1` then the output of the script should be: 
+```
+diffing 0 and 1
+There was a difference between runs 0 and 1 saving output files
+Divergence happens at: line 57
+```
+
+## Contents
 pythonScripts contains just those.
     flagVariance.py is a script to test the effect of different flags on number of bytecodes executed
     stripExtra.py is a script that will run a given program (command line arg) and will use the print the executed bytecodes and strip off info surounding given method name (commandline arg)
