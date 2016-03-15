@@ -15,25 +15,24 @@ cd YourOpenJDK
 bash ./get_source.sh
 ```
 
-#### Configuring
+### Configuring
 After the source code is obtained we need to configure the build. For building OpenJDK8 we will need a version of JDK7 that is Update 7 or newer. You can go [here](http://www.oracle.com/technetwork/java/javase/downloads/index.html) to obtain JDK 7. It is also necessary that the JDK 7 be accessible through your `PATH`. If that is not desirable or not an option then the following configure call will need an additional flag: `--with-boot-jdk=`*path*, where *path* is the path to your JDK 7.
 
 
 Now we can configure:
 
 ```bash
-cd YourOpenJDK
 bash ./configure --enable-debug --with-target-bits=64
 ```
 
-#### Making
+### Making
 Easiest part:
 
 ```bash
 make all
 ```
 
-#### Modifying tool:
+### Modifying tool:
 
 In the file `stripExtra.py` in the `pythonScripts` directory the first two lines are the absolute path to the newly made debug versions of `java` and `javac`. These lines should be modified to be the path to YOUR copy.
 
