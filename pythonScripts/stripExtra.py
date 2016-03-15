@@ -14,6 +14,7 @@ The fifth (if entered) is the output file to write results to, if none given the
 """
 
 
+from optparse import OptionParser
 import subprocess
 import sys
 import re
@@ -21,16 +22,19 @@ import re
 debugJavac = "/usr/local/OpenJDK8/build/linux-x86_64-normal-server-fastdebug/jdk/bin/javac"
 debugJava = "/usr/local/OpenJDK8/build/linux-x86_64-normal-server-fastdebug/jdk/bin/java"
 
-def compileAndRun(fileName,className,inputFile):
-    """This function will handle the compilation and will run the file with any inputs"""
+def compileProg(fileName):
+    """This function will handle the compilation of the given file with the debugJavac, but only if this script is called with
+    the -c flag."""
     # first we compile the program with the debug compiler
     # we need to add the -d flag and the "." so that we create the .class file in the local directory. will be cleaned up later
     p1 = subprocess.Popen([debugJavac,"-d","/tmp/",fileName],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
     p1.communicate()
 
-    # now we run the debug JVM with the flags in order to get the bytecode trace
+def runProg(className,inputFile):
+    """This function will run the file with any inputs"""
 
-    # first we extract the class name. We find the last / and the .java, everything between should be the className
+    # we run the debug JVM with the flags in order to get the bytecode trace
+
     p2 = subprocess.Popen([debugJava,"-classpath","/tmp/","-XX:+TraceBytecodes","-Xint",className],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
     for i in inputFile:
         p2.stdin.write(i); # this line may need + "\n" if input isn't accepted
@@ -39,10 +43,12 @@ def compileAndRun(fileName,className,inputFile):
     if se:
         se = se.split("\n")
         # there is something in the stdError output. Report this to the user and attempt to continue.
-        print("There was an error running your code: ")
+        sys.stderr.write("There was an error running your code:\n")
         for e in se:
-            print(e)
-        print("Script will continue, but depending on error may have unexpected results")
+            sys.stderr.write(e)
+            sys.stderr.write("\n")
+        sys.stderr.write("Are you sure it was compiled?\n")
+        sys.stderr.write("Script will continue, but depending on error may have unexpected results\n")
     # make the output have one line per element
 
     return so.split("\n")
@@ -56,15 +62,14 @@ def stripLines(so,phrase):
     data = []
     try:
         first = next(i for i,v in enum if re.match(r'.*'+phrase,v))
-        # for the second we will assume there is only one line after the phrase, probably a bad assumption
         second = next(i for i,v in reversed(enum) if re.match(r'.*' + phrase,v))
     except StopIteration:
-        print("Could not find " + phrase + " in the output, are you sure the function is called?")
+        sys.stderr.write("Could not find " + phrase + " in the output, are you sure the function is called?\n")
     else:
         try:
             stop = so[second:].index("")
         except ValueError:
-            print("Weird error, could not find an empty string after last return")
+            sys.stderr.write("Weird error, could not find an empty string after last return\n")
         else:
             data = so[first:stop+second]
 
@@ -81,42 +86,58 @@ def cleanData(data):
 
     return data
 
+
 def main():
     """This function will handle all command-line arguments and call other functions"""
-    if(len(sys.argv) < 2):
-        print("Must have a first argument - java file to compile");
+    parser = OptionParser()
+    parser.add_option("-f", "--file", dest="filename",help="Must have java file to compile", metavar="FILE")
+    parser.add_option("-c", "--compile", action="store_true",dest="toCompile",help="Determines whether to compile the program or not", metavar="COMPILE")
+    parser.add_option("-n", "--class", dest="className",help="class name to strip around", metavar="CLASS")
+    parser.add_option("-m", "--method", dest="method",help="Method name to strip around", metavar="METHOD")
+    parser.add_option("-i", "--input", dest="inputFile",help="input file to read from", metavar="INPUT")
+    parser.add_option("-o", "--output", dest="outputFile",help="output file to write output to", metavar="OUTPUT")
+
+    (options,args) = parser.parse_args()
+
+    if(options.filename == None):
+        print("Must have a java file to compile, written after the -f flag.");
         sys.exit()
 
-    if(len(sys.argv) < 3):
-        print("Must have a second argument, class name to look for.")
+    if(options.className == None):
+        print("Must have a class name to look for, written after the -n flag.")
         sys.exit()
 
-    if(len(sys.argv) < 4):
-        print("Must have a third argument, method name to look for.")
+    if(options.method == None):
+        print("Must have a method name to look for, written after the -m flag.")
         sys.exit()
-
+    
     iFile = []
-    if(len(sys.argv) >= 5):
+    if(options.inputFile == None):
+        sys.stderr.write("No input file provided, must be added after -i flag.")
+    else:
         try:
-            iFile = open(sys.argv[4],"r").readlines()
+            iFile = open(options.inputFile,"r").readlines()
         except IOError as e:
             sys.stderr.write("Couldn't open file: "+sys.argv[4]+ "\n")
             sys.stderr.write("Got this error:\n")
-            sys.stderr.write(e)
+            sys.stderr.write("\t"+str(e))
             sys.stderr.write("\n")
             sys.stderr.write("Script will continue as if there were no input file\n")
-            iFile = []
 
-    if (len(sys.argv) < 6):
+    if (options.outputFile == None):
         oFile = sys.stdout 
     else:
-        oFile = open(sys.argv[5],"w")
+        oFile = open(options.outputFile,"w")
 
-    className= sys.argv[1][sys.argv[1].rfind("/")+1:sys.argv[1].find(".java")]
-    output = compileAndRun(sys.argv[1],className,iFile)
+    # we find the className from the file provided for the running. The className on the commandline
+    # is for stripping input around, but may not be the "main" class of the file
+    className= options.filename[options.filename.rfind("/")+1:options.filename.find(".java")]
+    if options.toCompile:
+        compileProg(options.filename)
+    output = runProg(className,iFile)
 
     # output now needs to be formatted
-    phrase = sys.argv[2] + "." + sys.argv[3]
+    phrase = options.className + "." + options.method 
     data = stripLines(output,phrase)
 
     # now we have the lines we need, we want to remove [####] and ######  from them:
@@ -126,6 +147,8 @@ def main():
     # now that data is clean... write it to file:
     for i in data:
         oFile.write(i+"\n")
+
+    oFile.close()
 
 
 if __name__ == "__main__":
