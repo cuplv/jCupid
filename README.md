@@ -7,11 +7,11 @@
 ===
 This will require building OpenJDK with certain flags, thus you must obtain the code, this is done with Mercurial:
 
-```
+<pre>
 hg clone http://hg.openjdk.java.net/jdk8/jdk8 YourOpenJDK 
-cd _YourOpenJDK_ 
+cd <i>YourOpenJDK</i> 
 bash ./get_source.sh
-```
+</pre>
 
 #### Configuring
 ===
