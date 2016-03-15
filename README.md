@@ -1,10 +1,10 @@
 # bytecode-tool
 
 ## Necessary tools:
+
 ### OpenJDK
 
 #### Obtaining source code:
-===
 This will require building OpenJDK with certain flags, thus you must obtain the code, this is done with Mercurial:
 
 <pre>
@@ -14,7 +14,6 @@ bash ./get_source.sh
 </pre>
 
 #### Configuring
-===
 After the source code is obtained we need to configure the build. For building OpenJDK8 we will need a version of JDK7 that is Update 7 or newer. You can go [here](http://www.oracle.com/technetwork/java/javase/downloads/index.html) to obtain JDK 7. 
 
 Now we can configure:
@@ -24,7 +23,6 @@ bash ./configure --enable-debug --with-target-bits=64
 </pre>
 
 #### Making
-===
 Easiest part:
 
 ```
