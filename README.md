@@ -1,9 +1,7 @@
 # bytecode-tool
 
 ## Necessary tools:
-===
 ### OpenJDK
-===
 
 #### Obtaining source code:
 ===
