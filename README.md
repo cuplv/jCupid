@@ -17,11 +17,13 @@ bash ./get_source.sh
 ===
 After the source code is obtained we need to configure the build. For building OpenJDK8 we will need a version of JDK7 that is Update 7 or newer. You can go [here](http://www.oracle.com/technetwork/java/javase/downloads/index.html) to obtain JDK 7. 
 
-Now *we* _can_ configure:
+Now we can configure:
+<pre>
 ```
 cd _YourOpenJDK_
 bash ./configure --enable-debug --with-target-bits=64
 ```
+</pre>
 
 #### Making
 ===
