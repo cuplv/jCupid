@@ -19,10 +19,8 @@ After the source code is obtained we need to configure the build. For building O
 
 Now we can configure:
 <pre>
-```
 cd _YourOpenJDK_
 bash ./configure --enable-debug --with-target-bits=64
-```
 </pre>
 
 #### Making
