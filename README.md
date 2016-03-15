@@ -55,16 +55,16 @@ Divergence happens at: line 57
 ## Contents
 pythonScripts contains just those.
 
-    flagVariance.py is a script to test the effect of different flags on number of bytecodes executed
+`flagVariance.py` is a script to test the effect of different flags on number of bytecodes executed
 
-    stripExtra.py is a script that will run a given program (command line arg) and will use the print the executed bytecodes and strip off info surounding given method name (commandline arg)
+`stripExtra.py` is a script that will run a given program (command line arg) and will use the print the executed bytecodes and strip off info surounding given method name (commandline arg)
 
-    diffRuns.py a script to call stripExtra a given number of times and diff the output bytecodes
+`diffRuns.py` a script to call stripExtra a given number of times and diff the output bytecodes
 
-HelloWorld.java - just that
+`HelloWorld.java` - just that
 
-Lucky13.java - code that will implement a lucky13 attack (length of input makes MAC run longer or shorter)
+`Lucky13.java` - code that will implement a lucky13 attack (length of input makes MAC run longer or shorter)
 
-SumBytes.java - takes a string and sums those bytes, value determines whether to hash once or twice.
+`SumBytes.java` - takes a string and sums those bytes, value determines whether to hash once or twice.
 
-SumRandomBytes.java - Takes a string and sums those bytes, that determines how many bytes to read from /dev/random, hashes that resulting string of bytes.
+`SumRandomBytes.java` - Takes a string and sums those bytes, that determines how many bytes to read from /dev/random, hashes that resulting string of bytes.
