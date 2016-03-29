@@ -7,7 +7,7 @@ import java.util.Scanner;
 
 public class SumRandomBytes
 {
-    public static int sumArray(String s)
+    public static int sumString(String s)
     {
         byte[] bArray = s.getBytes();
         int sum = 0;
@@ -32,7 +32,7 @@ public class SumRandomBytes
 
         String s = sc.nextLine();
         
-        int sumOfBytes = sumArray(s);
+        int sumOfBytes = sumString(s);
 
         byte[] data = new byte[sumOfBytes];
         try
