@@ -1,0 +1,232 @@
+% TEMPLATE for Usenix papers, specifically to meet requirements of
+%  USENIX '05
+% originally a template for producing IEEE-format articles using LaTeX.
+%   written by Matthew Ward, CS Department, Worcester Polytechnic Institute.
+% adapted by David Beazley for his excellent SWIG paper in Proceedings,
+%   Tcl 96
+% turned into a smartass generic template by De Clarke, with thanks to
+%   both the above pioneers
+% use at your own risk.  Complaints to /dev/null.
+% make it two column with no page numbering, default is 10 point
+
+% Munged by Fred Douglis <douglis@research.att.com> 10/97 to separate
+% the .sty file from the LaTeX source template, so that people can
+% more easily include the .sty file into an existing document.  Also
+% changed to more closely follow the style guidelines as represented
+% by the Word sample file. 
+
+% Note that since 2010, USENIX does not require endnotes. If you want
+% foot of page notes, don't include the endnotes package in the 
+% usepackage command, below.
+
+% This version uses the latex2e styles, not the very ancient 2.09 stuff.
+\documentclass[letterpaper,twocolumn,10pt]{article}
+\usepackage{usenix,epsfig,endnotes,url,listings}
+\usepackage{color}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{frame=tb,
+  language=Java,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3
+}
+\begin{document}
+
+%don't want date printed
+\date{}
+
+%make title bold and 14 pt font (Latex default is non-bold, 16 pt)
+\title{\Large \bf jCupid: A dynamic analysis tool for detecting side channels in Java programs}
+
+%for single author (just remove % characters)
+\author{
+{\rm Ian Martiny}\\
+University of Colorado at Boulder
+\and
+{\rm Eric Wustrow}\\
+University of Colorado at Boulder
+\and
+{\rm Ashutosh Trivedi}\\
+University of Colorado at Boulder
+\and
+{\rm Pavol Cerny}\\
+University of Colorado at Boulder
+} % end author
+
+\maketitle
+
+% Use the following at camera-ready time to suppress page numbers.
+% Comment it out when you first submit the paper for review.
+\thispagestyle{empty}
+
+
+\subsection*{Abstract}
+Writing secure applications is difficult. Lots of research goes into finding and exploiting flaws written into software. Side channels in programs are of particular threat -- the program leaking information other than what is intended. A common side-channel that is exploited is time. In this paper we present a tool to aid developers in removing timing side channels from their code. jCupid is a tool which dynamically tests programs for timing side channels by examining the bytecodes that are executed. jCupid will run user programs with various inputs of the same size to in order to detect vulnerabilities.
+\section{Introduction}
+
+Timing side channels are the bane of developers for security programs. The prototypical example of flawed program with a timing side channel is a password checker which verifies user input against a stored password one character at a time and immediately reports results. This program leaks timing information back to the user -- on an incorrect password, how many of the characters were correct (more correct characters means longer execution time).
+
+Often side channels are much less obvious, and much more subtle. Even solutions in order to prevent side channels can create their own side channels~\cite{al2013lucky}. However these (sometimes subtle) side channels can leak valuable information, sometimes even private key information.
+
+Thus it must fall to the developer to ensure that no extra information is leaked when using their software. Our work here is to aid the developer in this difficult and precise task. In order to do so we re-framed the problem of timing information to \emph{work done}. Timing side channels are what we aim to eliminate with this tool, however we approach this in an oblique manner. Our motivation for this is that timing is \emph{hard}, especially over networks or systems with noise. This may add some false sense of security to developers that this difficulty is a defense, however as networks and systems get less noisy this ``defense'' diminishes.
+
+We must endeavor to remove these side channels, ideally before the code is even used in a release. To get around the difficulty of timing imbalances we have focused in on Java programs, and the work that they do. In particular Java programs run instructions: bytecodes. Our tool, jCupid, will attempt to determine if there are a set of inputs which cause a program to execute different bytecodes. Essentially asking the question: are there inputs which make programs do different work?
+
+\section{Related Work}
+
+The idea monitoring executed bytecodes is not dissimilar to that of finding all of the paths through a program. This led us to many concolic testers and input fuzzers. 
+
+In particular jFuzz~\cite{jayaraman2009jfuzz}, a concolic whitebox input fuzzer, built on the NASA Java PathFinder. The goal of jFuzz is to start from a given seed and using this find inputs which lead down all possible paths of a given program. As mentioned this goal is not completely perpendicular to our own, and finding which inputs lead down unique paths is valuable information. This project however was difficult to get running, as it requires Java 1.5, and seemingly does not work with Java 1.8.
+
+Additionally another concolic tester, jCute~\cite{conf/cav/SenA06} allowed us to use more recent versions of Java. While jCute was a promising tool we found that that for some of our test programs jCute did not recognize various paths in our program.
+
+Also OpenJDK~\cite{OpenJDK} provided us with the ability to look at executed bytecodes. The key word here being \emph{executed} bytecodes, there are numerous static analyzers that allow the user to examine the bytecode information of their code~\cite{vallee1999soot}. However a bytecode (or timing) difference can occur in a library call and as such we need to dynamically analyze bytecodes that are executed on each run. The OpenJDK project is an open-source version of Oracle's JDK. This was key for jCupid due to certain flags for the JDK (\texttt{-XX:+TraceBytecodes}) are only allowed in develop versions of the JDK, compiled with a debug flag. The release version of the JDK does not allow the use of this flag, however compiling OpenJDK with the debug flag allowed us access to dynamically executed bytecodes. Listing~\ref{lst:ex} shows an example of code in which bytecode differences will occur not in the source code but in a library call. The \texttt{SumRandomBytes} program will read a string from the user and then sum the bytes of the characters. This sum gives the number of bytes to read from a file which are then hashed. The hash function will do different amounts of work based on the given input string.
+
+The above projects are great tools, but do not solve the problem at hand, which is to pinpoint which bytecode, or line of code causes a program do different work for different inputs. This is what jCupid attempts to help solve with the aid, or incite of the above projects.
+
+\begin{figure}[t]
+  \begin{center}
+    \begin{lstlisting}[caption={Example of code with bytecode difference in library call},label={lst:ex},language=Java]
+public class SumRandomBytes
+{
+  public static void main(String [] args)
+  {
+    Scanner sc = new Scanner(System.in);
+    String s = sc.nextLine();
+
+    int sumOfBytes = sumString(s);
+    byte [] data = new byte[sumOfBytes];
+
+    data = readBytes(sumOfBytes);
+
+    MessageDigest md = MessageDigest.getInstance("SHA-1");
+    md.digest(data);
+  }
+}
+    \end{lstlisting}
+  \end{center}
+\end{figure}
+
+\section{jCupid}
+jCupid is at heart a python script which takes advantage of OpenJDK. Besides allowing us to see the bytecodes as they are executed we were able to modify OpenJDK in various ways to help get results quickly. When running jCupid we first need to determine if there are different inputs which run different bytecodes. However a lot of bytecodes are run even for very simple programs, for a ``Hello World'' program, running OpenJDK with the \texttt{-XX:+TraceBytecodes} flag takes 8.6 seconds with 1,179,829 bytecodes executed. Even more disheartening is that even this simple program does not run the same bytecodes in the same order for consecutive runs. Most of the bytecodes that are executed are just for the JVM start up and shutdown. In fact only 6,054 bytecodes are run from when the \texttt{main} method begins to when it returns. Meaning that 1,173,775 bytecodes that are executed are outside of the user's control. In order to avoid examining all of these bytecodes and finding numerous false positive bytecode differences we modified OpenJDK to allow for us to dictate which bytecodes we will examine. We will discuss this more in Section~\ref{sec:OpenJDK}.
+
+After determining two inputs that lead to different bytecodes being executed we need to trace this back to a source code line number -- it is no help to just inform developers there is a problem they need to know what to fix. Luckily the flag \texttt{-XX:+TraceBytecodes} and the \texttt{javap} utility provide a way to do this. We now dive into the execution of the jCupid tool.
+
+\subsection{Inputs}
+
+First we need to discuss the creation of inputs to sample programs. The goal of this project is to find different bytecodes being executed as a result of different inputs, so it is natural to want to find all different paths in a program. As mentioned above jCute would be a great resource for this. However there were sample programs where jCute was unable to determine paths which were dependent about input. 
+
+Another flaw is just finding paths may not be what we are looking for. For example even the best implementation of AES is going to take a different amount of time and run different bytecodes when trying to encrypt a message of one byte vs. a message of a million bytes. However the interesting question is are there any messages of length 128 bytes, say, which cause a particular implementation of AES to run different bytecodes. 
+
+Thus finding inputs that lead down different paths is interesting however we would need to enforce that the inputs we also of a particular form. For jCupid we decided to have the user provide the input size and jCupid would generate random strings in an attempt to get different bytecodes to execute.
+
+\subsection{OpenJDK}\label{sec:OpenJDK}
+
+Modifying OpenJDK was a major part of this project. As mentioned above it was slow to run the desired flags over a program and wait for the output. Since we are trying random inputs we do not want to have to wait for every input to list their bytecodes and then compare them, as well as ignore any false positives.
+
+To help in this we modified OpenJDK to allow for new flags: \texttt{-hashClass}, \texttt{-hashMethod}, \texttt{-traceClass}, and \texttt{-traceMethod}. Each takes an argument, a class name or method name respectively. The \texttt{-hashClass} and \texttt{-hashMethod} flags are used together as are the trace variants. Their arguments dictate the class and method that we are interested in. For example in Listing~\ref{lst:ex} we would be interested in the class \texttt{SumRandomBytes} and the method \texttt{main}. Though in general the user could specify any class/method in their program. 
+
+When the hash flags are used, instead of printing all bytecodes that are executed the modified JVM will execute bytecodes until it reaches the method specified and then begin iteratively hashing bytecodes, using Berstein's djb2 hash~\cite{djb2Hash}, until the user selected method's  return statement is executed, and then simply execute the remaining bytecodes (again without printing). Finally the JVM will print the resulting hash. 
+
+These hash flags provide a very quick way to verify whether the same bytecodes have been executed or not. The ``Hello World'' program mention above which took 8.6 seconds to run when printing the bytecodes takes only 0.78 seconds to run with the hash flags. Additionally the hash result is a simple check to see if same bytecodes are being executed.
+
+Once a new hash is seen we have two inputs which lead to different bytecodes being executed. Now the goal is to determine which bytecodes differ and which line of source code this corresponds to. This is helped by the trace flags above. The JVM is run with the trace flags and again executes bytecodes until the specified method is run then it begin printing bytecodes and stops once the specified method returns. This is essentially what \texttt{-XX:+TraceBytecodes} does but is much faster (the ``Hello World'' program runs in about 0.78 seconds again) and has the benefit that it ignores the start up and shut down of the JVM which will eliminate false positives.
+
+\subsection{Cross-referencing to line number}
+
+Once we have run the JVM with the trace flags we can compare the outputs to determine where the first difference occurs. However this will not directly give us a line number in the source code. As mentioned above the output from the trace flags as well as the \texttt{javap} utility will be of help here. A sample (filtered) output from \texttt{-XX:+TraceBytecodes} is included in Listing~\ref{lst:sample}, the numbers that are listed before bytecodes is the relative order the bytecode is executed within the listed function. For one this is helpful while reading this file to determine where in the function we are executing. Since this is the dynamic execution order of bytecodes the output often jumps between functions at various places. Much more helpful is the fact that this relative bytecode count is also listed by line number with the \texttt{javap} utility, as seen in Listing~\ref{lst:lines}. Thus the last stage of jCupid is to look at this material and look for the last line of the source code where the bytecodes agree and inform the user that the inputs do different work after this point.
+
+\begin{figure}[t]
+  \begin{center}
+    \begin{lstlisting}[language=make,caption={Example output from OpenJDK with trace flags set},label={lst:sample}]
+static void SumRandomBytes.main(jobject)
+     0  new 2 <java/util/Scanner>
+
+virtual jobject java.lang.ClassLoader.loadClass(jobject)
+     0  fast_aload_0
+     1  aload_1
+     2  iconst_0
+     3  invokevirtual 41 <java/lang/ClassLoader.loadClass(
+     Ljava/lang/String;Z)Ljava/lang/Class;> 
+    \end{lstlisting}
+  \end{center}
+\end{figure}
+
+\begin{figure}[h]
+  \begin{center}
+    \begin{lstlisting}[language=make,caption={Example output from \texttt{javap}},label={lst:lines}]
+public static void main(java.lang.String[]);
+    LineNumberTable:
+      line 31: 0
+      line 33: 11
+      line 35: 16
+      line 37: 21
+      line 40: 26
+      line 51: 32
+      line 42: 35
+      line 44: 37
+      line 45: 45
+      line 51: 49
+      line 47: 52
+      line 49: 54
+      line 50: 62
+      line 56: 66
+      line 57: 73
+      line 63: 81
+      line 59: 84
+      line 61: 86
+      line 62: 94
+      line 65: 98
+    \end{lstlisting}
+  \end{center}
+\end{figure}
+\section{Evaluation}
+In order to test jCupid we wrote a series of sample tests, some which depend on user input, others not. The ones that depend on user input vary on how the execution depends on the input. Some are very direct, testing the input directly, the more interesting examples depend on aspects of the input, such as the length or the sum of the characters etc.
+
+jCupid runs quickly, the time is evenly spent between finding inputs which produce different hash outputs and then cross-referencing to get the line number. Since the strings that are selected are random the runtime of the program can vary, sometimes finding inputs quickly other times not.
+
+\section{Future Work}
+
+There are many avenues of this project to advance work. In particular finding, or adapting, a concolic tester to hit all paths in a program. For the examples that jCute did work on, it was much faster at finding input than the random fuzzer that we implemented (as would be expected). As mentioned above not only would we want this tester to be able to find all paths, but find paths that are reachable under given constraints, such as input length.
+
+Another interesting avenue is to refine this tool to examine the types of differences we see in bytecode execution. In particular it may be that certain programs are written so that there are not timing difference but there are bytecode execution differences. In the goal of this project to correct timing side channels this might be considered a false positive as well. Thus it would be interesting to collect bytecodes into equivalence classes by time and allowing differences in execution within these classes.
+
+This project was written for Java programs, it would be a note-worthy extension to continue this project in C to let a greater audience access to this tool.
+
+\section{Conclusion}
+
+A great concern when writing security intended programs is side channels. Execution time of a given program is often heavily focused on for programs to ensure no extraneous information is being leaked. With jCupid we hope to aid developers in writing side channel free code. jCupid changes the timing side channel into a side channel based on amount of work done, specifically the bytecodes that are executed. 
+
+It examines the bytecodes in a superficial way at first by examining a fast hash of the important bytecodes. When finding different hashes a more in depth analysis occurs in order to inform the user which line number of the source code causes the difference. 
+
+This tool is recommended to be used by developers to test very specific aspects of their code. Running even moderately sized projects, say a calculator for example, through jCupid will most certainly find different bytecodes executed based on input (even of the same length). This is intended as a more precise tool. Instead of analyzing the whole calculator, to continue the analogy from above, analyzing whether the multiplication function executes different bytecodes for inputs of the same size. Though of course this is geared more towards security applications.
+
+Developers would ideally run this code before major releases, before people may be susceptible to unexpected side channel attacks. Depending on the project it may benefit from overnight running on different input sizes and analyzing various functions.
+
+
+{\footnotesize \bibliographystyle{acm}
+\bibliography{refs}}
+
+
+
+\end{document}
+
+
+
+
+
+
