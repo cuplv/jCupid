@@ -1,0 +1,72 @@
+jCupid is at heart a python script which takes advantage of OpenJDK. Besides allowing us to see the bytecodes as they are executed we were able to modify OpenJDK in various ways to help get results quickly. When running jCupid we first need to determine if there are different inputs which run different bytecodes. However a lot of bytecodes are run even for very simple programs, for a ``Hello World'' program, running OpenJDK with the \texttt{-XX:+TraceBytecodes} flag takes 8.6 seconds with 1,179,829 bytecodes executed. Even more disheartening is that even this simple program does not run the same bytecodes in the same order for consecutive runs. Most of the bytecodes that are executed are just for the JVM start up and shutdown. In fact only 6,054 bytecodes are run from when the \texttt{main} method begins to when it returns. Meaning that 1,173,775 bytecodes that are executed are outside of the user's control. In order to avoid examining all of these bytecodes and finding numerous false positive bytecode differences we modified OpenJDK to allow for us to dictate which bytecodes we will examine. We will discuss this more in Section~\ref{sec:OpenJDK}.
+
+After determining two inputs that lead to different bytecodes being executed we need to trace this back to a source code line number -- it is no help to just inform developers there is a problem they need to know what to fix. Luckily the flag \texttt{-XX:+TraceBytecodes} and the \texttt{javap} utility provide a way to do this. We now dive into the execution of the jCupid tool.
+
+\subsection{Inputs}
+
+First we need to discuss the creation of inputs to sample programs. The goal of this project is to find different bytecodes being executed as a result of different inputs, so it is natural to want to find all different paths in a program. As mentioned above jCute would be a great resource for this. However there were sample programs where jCute was unable to determine paths which were dependent about input. 
+
+Another flaw is just finding paths may not be what we are looking for. For example even the best implementation of AES is going to take a different amount of time and run different bytecodes when trying to encrypt a message of one byte vs. a message of a million bytes. However the interesting question is are there any messages of length 128 bytes, say, which cause a particular implementation of AES to run different bytecodes. 
+
+Thus finding inputs that lead down different paths is interesting however we would need to enforce that the inputs we also of a particular form. For jCupid we decided to have the user provide the input size and jCupid would generate random strings in an attempt to get different bytecodes to execute.
+
+\subsection{OpenJDK}\label{sec:OpenJDK}
+
+Modifying OpenJDK was a major part of this project. As mentioned above it was slow to run the desired flags over a program and wait for the output. Since we are trying random inputs we do not want to have to wait for every input to list their bytecodes and then compare them, as well as ignore any false positives.
+
+To help in this we modified OpenJDK to allow for new flags: \texttt{-hashClass}, \texttt{-hashMethod}, \texttt{-traceClass}, and \texttt{-traceMethod}. Each takes an argument, a class name or method name respectively. The \texttt{-hashClass} and \texttt{-hashMethod} flags are used together as are the trace variants. Their arguments dictate the class and method that we are interested in. For example in Listing~\ref{lst:ex} we would be interested in the class \texttt{SumRandomBytes} and the method \texttt{main}. Though in general the user could specify any class/method in their program. 
+
+When the hash flags are used, instead of printing all bytecodes that are executed the modified JVM will execute bytecodes until it reaches the method specified and then begin iteratively hashing bytecodes, using Berstein's djb2 hash~\cite{djb2Hash}, until the user selected method's  return statement is executed, and then simply execute the remaining bytecodes (again without printing). Finally the JVM will print the resulting hash. 
+
+These hash flags provide a very quick way to verify whether the same bytecodes have been executed or not. The ``Hello World'' program mention above which took 8.6 seconds to run when printing the bytecodes takes only 0.78 seconds to run with the hash flags. Additionally the hash result is a simple check to see if same bytecodes are being executed.
+
+Once a new hash is seen we have two inputs which lead to different bytecodes being executed. Now the goal is to determine which bytecodes differ and which line of source code this corresponds to. This is helped by the trace flags above. The JVM is run with the trace flags and again executes bytecodes until the specified method is run then it begin printing bytecodes and stops once the specified method returns. This is essentially what \texttt{-XX:+TraceBytecodes} does but is much faster (the ``Hello World'' program runs in about 0.78 seconds again) and has the benefit that it ignores the start up and shut down of the JVM which will eliminate false positives.
+
+\subsection{Cross-referencing to line number}
+
+Once we have run the JVM with the trace flags we can compare the outputs to determine where the first difference occurs. However this will not directly give us a line number in the source code. As mentioned above the output from the trace flags as well as the \texttt{javap} utility will be of help here. A sample (filtered) output from \texttt{-XX:+TraceBytecodes} is included in Listing~\ref{lst:sample}, the numbers that are listed before bytecodes is the relative order the bytecode is executed within the listed function. For one this is helpful while reading this file to determine where in the function we are executing. Since this is the dynamic execution order of bytecodes the output often jumps between functions at various places. Much more helpful is the fact that this relative bytecode count is also listed by line number with the \texttt{javap} utility, as seen in Listing~\ref{lst:lines}. Thus the last stage of jCupid is to look at this material and look for the last line of the source code where the bytecodes agree and inform the user that the inputs do different work after this point.
+
+\begin{figure}[t]
+  \begin{center}
+    \begin{lstlisting}[language=make,caption={Example output from OpenJDK with trace flags set},label={lst:sample}]
+static void SumRandomBytes.main(jobject)
+     0  new 2 <java/util/Scanner>
+
+virtual jobject java.lang.ClassLoader.loadClass(jobject)
+     0  fast_aload_0
+     1  aload_1
+     2  iconst_0
+     3  invokevirtual 41 <java/lang/ClassLoader.loadClass(
+     Ljava/lang/String;Z)Ljava/lang/Class;> 
+    \end{lstlisting}
+  \end{center}
+\end{figure}
+
+\begin{figure}[h]
+  \begin{center}
+    \begin{lstlisting}[language=make,caption={Example output from \texttt{javap}},label={lst:lines}]
+public static void main(java.lang.String[]);
+    LineNumberTable:
+      line 31: 0
+      line 33: 11
+      line 35: 16
+      line 37: 21
+      line 40: 26
+      line 51: 32
+      line 42: 35
+      line 44: 37
+      line 45: 45
+      line 51: 49
+      line 47: 52
+      line 49: 54
+      line 50: 62
+      line 56: 66
+      line 57: 73
+      line 63: 81
+      line 59: 84
+      line 61: 86
+      line 62: 94
+      line 65: 98
+    \end{lstlisting}
+  \end{center}
+\end{figure}

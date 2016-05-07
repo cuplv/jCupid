@@ -1,0 +1,79 @@
+\documentclass{llncs}
+\input{header}
+
+\usepackage[colorlinks=true]{hyperref}
+
+\begin{document}
+
+\title{\textsc{jCupid}: A dynamic analysis tool for detecting side channels in Java programs}
+\author{
+  Ian Martiny
+  \and
+  Eric Wustrow
+  \and
+  Pavol {\v C}ern\'y
+  \and
+  Ashutosh Trivedi
+}
+\institute{University of Colorado Boulder, USA \\
+  \email{\{ian.martiny, ewust, pavol.cerny, ashutosh.trivedi\}@colorado.edu}}
+
+
+\maketitle
+
+\begin{abstract}
+  Side-channel based vulnerabilities continue to plague modern security-critical
+  applications.
+  From leaking private-keys to exposing sensitive data, 
+  protecting against these threats remains a difficult task for developers. 
+  A common defense against side-channels is to write constant-time code.
+  However, ensuring that a complex program has no data-dependent control flow
+  can be a laborious challenge, and can on occasion introduce or enable new side
+  channel vulnerabilities.
+  We present \jcupid{}, a tool that aids developers in detecting and
+  removing a particular class of side channels from their code.
+  \jcupid{} dynamically tests Java programs for timing side channels by examining
+  the sequence of bytecodes that are executed for multiple inputs.
+  Once two inputs are found that cause a different sequence of bytecodes to be
+  executed, \jcupid{} can inform the developer of the offending line of source code
+  responsible for the divergence.
+  While our tool can naively fuzz an instrumented program, it can also be used
+  in conjuction with a Concolic execution testing engine.
+  We show that instrumenting programs for use with \jcupid{} is simple for
+  developers, and that our tool can reveal timing side-channel vulnerabilities
+  that are not immediately obvious from source code inspection.
+\end{abstract}
+
+
+
+\section{Introduction}
+\label{sec:introduction}
+\input{introduction}
+
+
+\section{\textsc{jCupid}}
+\label{sec:jcupid}
+\input{jcupid}
+
+\section{Evaluation}
+\label{sec:evaluation}
+\input{evaluation}
+
+\section{Future Work}
+\label{sec:future}
+\input{future}
+
+\section{Conclusion}
+\label{sec:conclusion}
+\input{conclusion}
+
+
+\bibliographystyle{plain}
+\bibliography{papers}
+
+\newpage
+\appendix
+\input{appendix}
+
+\end{document}
+

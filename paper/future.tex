@@ -1,0 +1,6 @@
+
+There are many avenues of this project to advance work. In particular finding, or adapting, a concolic tester to hit all paths in a program. For the examples that jCute did work on, it was much faster at finding input than the random fuzzer that we implemented (as would be expected). As mentioned above not only would we want this tester to be able to find all paths, but find paths that are reachable under given constraints, such as input length.
+
+Another interesting avenue is to refine this tool to examine the types of differences we see in bytecode execution. In particular it may be that certain programs are written so that there are not timing difference but there are bytecode execution differences. In the goal of this project to correct timing side channels this might be considered a false positive as well. Thus it would be interesting to collect bytecodes into equivalence classes by time and allowing differences in execution within these classes.
+
+This project was written for Java programs, it would be a note-worthy extension to continue this project in C to let a greater audience access to this tool.

@@ -1,0 +1,11 @@
+Timing side channels are the bane of developers for security programs. The prototypical example of flawed program with a timing side channel is a password checker which verifies user input against a stored password one character at a time and immediately reports results. This program leaks timing information back to the user -- on an incorrect password, how many of the characters were correct (more correct characters means longer execution time).
+
+Often side channels are much less obvious, and much more subtle. Even solutions in order to prevent side channels can create their own side channels~\cite{al2013lucky}. However these (sometimes subtle) side channels can leak valuable information, sometimes even private key information.
+
+Thus it must fall to the developer to ensure that no extra information is leaked when using their software. Our work here is to aid the developer in this difficult and precise task. In order to do so we re-framed the problem of timing information to \emph{work done}. Timing side channels are what we aim to eliminate with this tool, however we approach this in an oblique manner. Our motivation for this is that timing is \emph{hard}, especially over networks or systems with noise. This may add some false sense of security to developers that this difficulty is a defense, however as networks and systems get less noisy this ``defense'' diminishes.
+
+We must endeavor to remove these side channels, ideally before the code is even used in a release. To get around the difficulty of timing imbalances we have focused in on Java programs, and the work that they do. In particular Java programs run instructions: bytecodes. Our tool, jCupid, will attempt to determine if there are a set of inputs which cause a program to execute different bytecodes. Essentially asking the question: are there inputs which make programs do different work?
+
+
+\subsection{Related Work}
+\input{related}

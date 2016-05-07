@@ -1,0 +1,8 @@
+A great concern when writing security intended programs is side channels. Execution time of a given program is often heavily focused on for programs to ensure no extraneous information is being leaked. With jCupid we hope to aid developers in writing side channel free code. jCupid changes the timing side channel into a side channel based on amount of work done, specifically the bytecodes that are executed. 
+
+It examines the bytecodes in a superficial way at first by examining a fast hash of the important bytecodes. When finding different hashes a more in depth analysis occurs in order to inform the user which line number of the source code causes the difference. 
+
+This tool is recommended to be used by developers to test very specific aspects of their code. Running even moderately sized projects, say a calculator for example, through jCupid will most certainly find different bytecodes executed based on input (even of the same length). This is intended as a more precise tool. Instead of analyzing the whole calculator, to continue the analogy from above, analyzing whether the multiplication function executes different bytecodes for inputs of the same size. Though of course this is geared more towards security applications.
+
+Developers would ideally run this code before major releases, before people may be susceptible to unexpected side channel attacks. Depending on the project it may benefit from overnight running on different input sizes and analyzing various functions.
+

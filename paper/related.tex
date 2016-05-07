@@ -1,0 +1,32 @@
+The idea monitoring executed bytecodes is not dissimilar to that of finding all of the paths through a program. This led us to many concolic testers and input fuzzers. 
+
+In particular jFuzz~\cite{jayaraman2009jfuzz}, a concolic whitebox input fuzzer, built on the NASA Java PathFinder. The goal of jFuzz is to start from a given seed and using this find inputs which lead down all possible paths of a given program. As mentioned this goal is not completely perpendicular to our own, and finding which inputs lead down unique paths is valuable information. This project however was difficult to get running, as it requires Java 1.5, and seemingly does not work with Java 1.8.
+
+Additionally another concolic tester, jCute~\cite{conf/cav/SenA06} allowed us to use more recent versions of Java. While jCute was a promising tool we found that that for some of our test programs jCute did not recognize various paths in our program.
+
+Also OpenJDK~\cite{OpenJDK} provided us with the ability to look at executed bytecodes. The key word here being \emph{executed} bytecodes, there are numerous static analyzers that allow the user to examine the bytecode information of their code~\cite{vallee1999soot}. However a bytecode (or timing) difference can occur in a library call and as such we need to dynamically analyze bytecodes that are executed on each run. The OpenJDK project is an open-source version of Oracle's JDK. This was key for jCupid due to certain flags for the JDK (\texttt{-XX:+TraceBytecodes}) are only allowed in develop versions of the JDK, compiled with a debug flag. The release version of the JDK does not allow the use of this flag, however compiling OpenJDK with the debug flag allowed us access to dynamically executed bytecodes. Listing~\ref{lst:ex} shows an example of code in which bytecode differences will occur not in the source code but in a library call. The \texttt{SumRandomBytes} program will read a string from the user and then sum the bytes of the characters. This sum gives the number of bytes to read from a file which are then hashed. The hash function will do different amounts of work based on the given input string.
+
+The above projects are great tools, but do not solve the problem at hand, which is to pinpoint which bytecode, or line of code causes a program do different work for different inputs. This is what jCupid attempts to help solve with the aid, or incite of the above projects.
+
+\begin{figure}[t]
+  \begin{center}
+    \begin{lstlisting}[caption={Example of code with bytecode difference in library call},label={lst:ex},language=Java]
+public class SumRandomBytes
+{
+  public static void main(String [] args)
+  {
+    Scanner sc = new Scanner(System.in);
+    String s = sc.nextLine();
+
+    int sumOfBytes = sumString(s);
+    byte [] data = new byte[sumOfBytes];
+
+    data = readBytes(sumOfBytes);
+
+    MessageDigest md = MessageDigest.getInstance("SHA-1");
+    md.digest(data);
+  }
+}
+    \end{lstlisting}
+  \end{center}
+\end{figure}
