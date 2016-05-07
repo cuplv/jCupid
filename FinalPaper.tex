@@ -74,8 +74,18 @@ University of Colorado at Boulder
 \thispagestyle{empty}
 
 
-\subsection*{Abstract}
-Writing secure applications is difficult. Lots of research goes into finding and exploiting flaws written into software. Side channels in programs are of particular threat -- the program leaking information other than what is intended. A common side-channel that is exploited is time. In this paper we present a tool to aid developers in removing timing side channels from their code. jCupid is a tool which dynamically tests programs for timing side channels by examining the bytecodes that are executed. jCupid will run user programs with various inputs of the same size to in order to detect vulnerabilities.
+\subsection*{Abstract} Writing secure applications is difficult. Lots of
+research goes into finding and exploiting flaws written into software. Side
+channels in programs are of particular threat -- the program leaking
+information other than what is intended. A common side-channel that is
+exploited is time. In this paper we present a tool to aid developers in
+removing timing side channels from their code. jCupid is a tool which
+dynamically tests programs for timing side channels by examining the bytecodes
+that are executed. jCupid will run user programs with various inputs of the
+same size to in order to detect vulnerabilities.
+
+
+
 \section{Introduction}
 
 Timing side channels are the bane of developers for security programs. The prototypical example of flawed program with a timing side channel is a password checker which verifies user input against a stored password one character at a time and immediately reports results. This program leaks timing information back to the user -- on an incorrect password, how many of the characters were correct (more correct characters means longer execution time).
