@@ -89,12 +89,19 @@ public class Lucky13
             int pTextSize = pText.length;
             boolean goodPadding = true;
 
-            byte numEntries = (byte)(pText[pTextSize - 1] + 1); 
+            int numEntries = (int)(pText[pTextSize - 1] + 1) & 0xFF; 
+            //System.out.println("numEntries = " + numEntries);
             boolean validNumEntries;
             if (numEntries < 1 || numEntries > 16)
+            {
                 validNumEntries = false;
+                goodPadding = false;
+            }
             else 
+            {
                 validNumEntries = true;
+                goodPadding = true;
+            }
 
             int subTerm;
 
@@ -177,16 +184,18 @@ public class Lucky13
 
             // Now the Decrypt stage!
             Scanner sc = new Scanner(System.in);
-            System.out.println("Would you like to interject some ciphertext " 
-                    + "of your own? ");
+            //System.out.println("Would you like to interject some ciphertext " 
+                    //+ "of your own? ");
             String userInput = sc.next();
-            if (userInput.equals("y") || userInput.equals("Y"))
-            {
-                System.out.println("Enter your Ciphertext now: ");
-                String rogueCipherText = sc.next();
-                ct = rogueCipherText.getBytes("UTF8");
-                System.out.println("length of cText = " + ct.length);
-            }
+            ct = userInput.getBytes("UTF8");
+
+            //if (userInput.equals("y") || userInput.equals("Y"))
+            //{
+                //System.out.println("Enter your Ciphertext now: ");
+                //String rogueCipherText = sc.next();
+                //ct = rogueCipherText.getBytes("UTF8");
+                //System.out.println("length of cText = " + ct.length);
+            //}
             
             String pt = decrypt(ct, key,SecKey,IV);
             System.out.println("Plaintext is: " + pt);
