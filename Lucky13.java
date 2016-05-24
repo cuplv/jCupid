@@ -94,7 +94,7 @@ public class Lucky13
             byte[] pText = AesCipherDec.doFinal(cText);
             int pTextSize = pText.length;
 
-            byte numEntries = (byte)(pText[pTextSize - 1] + 1); 
+            byte numEntries = (byte)(pText[pTextSize - 1]);
             boolean validNumEntries;
             if (numEntries < 1 || numEntries > 16)
                 validNumEntries = false;
