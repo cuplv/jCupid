@@ -94,19 +94,7 @@ public class Lucky13
             byte[] pText = AesCipherDec.doFinal(cText);
             int pTextSize = pText.length;
 
-            byte numEntries = (byte)(pText[pTextSize - 1]);
-            boolean validNumEntries;
-            if (numEntries < 1 || numEntries > 16)
-                validNumEntries = false;
-            else 
-                validNumEntries = true;
-
-            int subTerm;
-
-            if (validNumEntries)
-                subTerm = numEntries;
-            else
-                subTerm = 0;
+            int numEntries = (int)(pText[pTextSize - 1]) & 0xFF;
 
             byte goodPadding = (byte)0xFF;
             for (int i=0; i<pTextSize; i++) {
@@ -114,6 +102,8 @@ public class Lucky13
                 goodPadding &= ~(in_padding & (pText[i] ^ numEntries));
             }
 
+            int subTerm;
+            subTerm = (int)(constant_time_gt(numEntries, 1) & constant_time_gt(16, numEntries) & (numEntries + 1));
 
 
             // now we figure out what to check the MAC of!
@@ -126,6 +116,8 @@ public class Lucky13
             byte[] message = Arrays.copyOfRange(pText,0,
                     pTextSize-subTerm-20);
             byte[] actualDigest = mac2.doFinal(message);
+            System.out.println(Arrays.toString(supposedDigest));
+            System.out.println(Arrays.toString(actualDigest));
             goodMAC = Arrays.equals(supposedDigest,actualDigest);
             System.out.println("goodMAC = " + goodMAC);
 
@@ -182,16 +174,18 @@ public class Lucky13
 
             // Now the Decrypt stage!
             Scanner sc = new Scanner(System.in);
-            System.out.println("Would you like to interject some ciphertext " 
-                    + "of your own? ");
+            //System.out.println("Would you like to interject some ciphertext " 
+                    //+ "of your own? ");
             String userInput = sc.next();
-            if (userInput.equals("y") || userInput.equals("Y"))
-            {
-                System.out.println("Enter your Ciphertext now: ");
-                String rogueCipherText = sc.next();
-                ct = rogueCipherText.getBytes("UTF8");
-                System.out.println("length of cText = " + ct.length);
-            }
+            ct = userInput.getBytes("UTF8");
+
+            //if (userInput.equals("y") || userInput.equals("Y"))
+            //{
+                //System.out.println("Enter your Ciphertext now: ");
+                //String rogueCipherText = sc.next();
+                //ct = rogueCipherText.getBytes("UTF8");
+                //System.out.println("length of cText = " + ct.length);
+            //}
             
             String pt = decrypt(ct, key,SecKey,IV);
             System.out.println("Plaintext is: " + pt);
