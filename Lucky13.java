@@ -79,6 +79,12 @@ public class Lucky13
         }
     }
 
+    public static byte constant_time_gt(int a, int b)
+    {
+        // a > b ? 0xFF : 0x00;
+        return (a > b) ? (byte)0xFF : (byte)0x00;
+    }
+
     public static String decrypt(byte[] cText, SecretKey MACKey, SecretKey AESKey, IvParameterSpec IV)
     {
         try
@@ -87,7 +93,6 @@ public class Lucky13
             AesCipherDec.init(Cipher.DECRYPT_MODE,AESKey,IV);
             byte[] pText = AesCipherDec.doFinal(cText);
             int pTextSize = pText.length;
-            boolean goodPadding = true;
 
             byte numEntries = (byte)(pText[pTextSize - 1] + 1); 
             boolean validNumEntries;
@@ -103,13 +108,13 @@ public class Lucky13
             else
                 subTerm = 0;
 
-            for(int i = pTextSize - numEntries; i < pTextSize; i++)
-            {
-                if(!validNumEntries || pText[i] != numEntries -1)
-                {
-                    goodPadding = false;
-                }
+            byte goodPadding = (byte)0xFF;
+            for (int i=0; i<pTextSize; i++) {
+                byte in_padding = constant_time_gt(i, pTextSize - numEntries);
+                goodPadding &= ~(in_padding & (pText[i] ^ numEntries));
             }
+
+
 
             // now we figure out what to check the MAC of!
             boolean goodMAC;
