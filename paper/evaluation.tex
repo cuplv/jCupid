@@ -1,4 +1,69 @@
 
-In order to test jCupid we wrote a series of sample tests, some which depend on user input, others not. The ones that depend on user input vary on how the execution depends on the input. Some are very direct, testing the input directly, the more interesting examples depend on aspects of the input, such as the length or the sum of the characters etc.
 
-jCupid runs quickly, the time is evenly spent between finding inputs which produce different hash outputs and then cross-referencing to get the line number. Since the strings that are selected are random the runtime of the program can vary, sometimes finding inputs quickly other times not.
+We evaluated jCupid using a set of simple programs that commonly contain timing
+side channels in their implementations.
+
+
+\paragraph{Password checking}
+The na\"{\i}ve method of checking whether a provided password is correct is to iterate
+over the provided input, comparing each character to its expected value, and
+returning failure on the first discovered difference. This results in a side
+channel that leaks the number of characters that an attacker has guessed
+correctly, allowing them to perform an adaptive attack. The attacker can guess
+each character independently, and only move on to the next character when they
+have found the correct character in the current position. While we call this a
+password checking test case, this pattern also occurs in any string comparison
+that should be done in constant time, such as when checking if CSRF or
+authentication tokens are valid.
+
+\paragraph{Lucky-13 attack}
+We implemented a toy Java version of the padding and MAC check employed in TLS
+decryption. Our implementation was vulnerable to the Lucky 13 attack, where
+an attacker modifies ciphertext, and can distinguish between the corresponding
+plaintext having valid padding or not. This capability allows an attacker to
+perform a Vaudenay attack and iteratively leak the plaintext.
+
+\paragraph{SumBytes}
+We created a program that reads a single byte to determine a length, then reads
+that many bytes and hashes them. Here, we are mimicking a simple serialized
+network protocol with a length encoded at the beginning of the message. The side
+channel present in this code is subtle: there are no if statements or obvious
+branches in the code. Rather, the number of bytes read determines the number of
+compression function iterations occur internal to our hash function.
+
+\paragraph{Multiplexer}
+Finally, we implemented a selection function that takes three inputs: a, b, and
+a selector. If the selector is true, our function returns the first input,
+otherwise it returns the second input. This is easily accomplished by an if
+statement, however, such an implementation may leak information due to instruction cache timing or
+memory accesses.
+
+
+
+For each of these programs, we allowed them to take a single input as a string
+on standard input. Then, we allowed jCupid to fuzz these programs with random
+inputs, and look for potential differences in the bytecodes executed. In each
+example, we found the intended side-channel, and jCupid was able to correctly
+determine the line of code responsible.
+
+We then corrected the problems identified by jCupid, and reran our tool to
+verify we had removed the offending side-channels. To our surprise, jCupid
+identified additional problems in our ``corrected'' programs. For example, in
+the password checking program, we used a temporary value, and updated it at each
+iteration with $ good \&= (input[i] == expected[i]) $. However, this resulted in
+a side-channel when computing the $ == $ operator, as Java implemented this as a
+branch in the bytecode. We fixed this by switching to using exclusive-or to
+compare the values, and jCupid did not detect any additional side-channels. This
+further illustrates the difficulty of removing all potential side-channels from
+code: even seemingly branch-free programs, written with the intention of not
+having side-channels, can contain them.
+
+
+As jCupid is a dynamic analysis tool, it must run many instances of the program
+in order to find side-channel behavior. We evaluated jCupid's overhead by
+measuring how quickly it can run basic Java programs, and compared it to running
+those same programs outside of the jCupid environment. Particularly for a
+developer dynamic analysis tool, our results are encouraging: per run, jCupid
+only adds approximately X\% of overhead. This could allow even rare
+side-channels to be detected with na\"{\i}ve fuzzing of nightly builds over unit
+tests.
