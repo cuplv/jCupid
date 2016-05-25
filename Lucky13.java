@@ -84,7 +84,9 @@ public class Lucky13
     public static byte constant_time_gt(int a, int b)
     {
         // a > b ? 0xFF : 0x00;
-        return (a > b) ? (byte)0xFF : (byte)0x00;
+        //return (a > b) ? (byte)0xFF : (byte)0x00;
+        return (byte)(((((b - a) & (-1)) >> 31)&0x01)*0xFF);
+
     }
 
     public static String decrypt(byte[] cText, SecretKey MACKey, SecretKey AESKey, IvParameterSpec IV)
