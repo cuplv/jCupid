@@ -1,16 +1,38 @@
 %% Attacks
 Side-channel attacks are the class of attacks on cryptographic system that
 attempt to gain information about a system by by exploiting involuntary
-information leakage via physical properties---
-such as temperature, electromagnetic leaks, memory footprint, and timing
+information leaks via physical properties---
+such as temperature, electromagnetic leaks, memory footprints, and timing
 delays---of the implementation rather than using brute force or exploiting
 theoretical weakness of the algorithm.
-%Perhaps the earliest documented example of a side-channel attack 
-%exploit 
-A number of known cryptographic attacks such as Padding Oracle
-attacks~\cite{Vau02}, Lucky-13 attack~\cite{al2013lucky}, 
+For our tool we focus on timing based information leaks in systems
+implemented in software. 
+Some notable examples of timing-based information leaks include \emph{padding oracle
+attack}~\cite{Vau02}, \emph{Lucky-13 attack}~\cite{al2013lucky},  Modular
+exponentiation algorithm employed in Diffie-Hellman, RSA, and
+DSS~\cite{kocher96}.
+
+A na\"ive remedy to timing-based information leaks in software-implemented
+systems is to make the software run in fixed time for all possible inputs by
+introducing timers to delay the observable outputs. 
+However, it is quite difficult to ensure in practice, and moreover the often CPU
+usage may also leak information in this situation. 
+Transcript security model by Molnar et al.~\cite{Molnar05} is another way
+to minimize information leak by requiring that for all confidential inputs, the
+observable outputs (sequence of program counter values or opcodes) are
+statistically indistinguishable.
+In our work, we propose an automatic testing framework to test whether a given
+Java program is transcript secure where transcripts are Java Bytecode
+instructions.
+Our framework, with some efforts, can be extended to more general notions of
+transcripts. 
+
+
 
 %% Testers -- concolic -- fuzzers
+
+
+
 Concolic testing~\cite{GKS05} and CUTE and jCUTE~\cite{Sen2006}.
 
 
@@ -18,9 +40,11 @@ Concolic testing~\cite{GKS05} and CUTE and jCUTE~\cite{Sen2006}.
 Synthesis of masking countermeasures against side-channel attacks~\cite{EW14}
 
 
-%% Info Flow
+%% Info Flow\
 secure information flow~\cite{Den76}, TaintDroid~\cite{Enck14}, Dynamic and
 Static Information Flow~\cite{SR10}.
+quantitative information flow~\cite{smith09}
+
 
 The idea monitoring executed bytecodes is not dissimilar to that of finding all
 of the paths through a program. This led us to many concolic testers and input
