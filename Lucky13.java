@@ -5,6 +5,7 @@
  * 
  */
 import javax.crypto.*;
+import javax.crypto.spec.*;
 import javax.crypto.spec.IvParameterSpec;
 import java.io.UnsupportedEncodingException;
 import java.lang.Integer;
@@ -15,6 +16,7 @@ import java.util.Arrays;
 import java.util.Random;
 import java.util.Scanner;
 
+import java.security.spec.InvalidKeySpecException;
 public class Lucky13
 {
     public static byte[] encrypt(String message, SecretKey MACKey, SecretKey AESKey, IvParameterSpec IV)
@@ -116,8 +118,8 @@ public class Lucky13
             byte[] message = Arrays.copyOfRange(pText,0,
                     pTextSize-subTerm-20);
             byte[] actualDigest = mac2.doFinal(message);
-            System.out.println(Arrays.toString(supposedDigest));
-            System.out.println(Arrays.toString(actualDigest));
+            //System.out.println(Arrays.toString(supposedDigest));
+            //System.out.println(Arrays.toString(actualDigest));
             goodMAC = Arrays.equals(supposedDigest,actualDigest);
             System.out.println("goodMAC = " + goodMAC);
 
@@ -156,19 +158,20 @@ public class Lucky13
         {
             // Generate a key for the HMAC-MD5 keyed-hashing algorithm; see RFC 2104
             // In practice, you would save this key.
-            KeyGenerator keyGen = KeyGenerator.getInstance("HmacSHA1");
-            SecretKey key = keyGen.generateKey();
 
             String str = "This message will be digested";
+            String password = "myPassword123456";
+            SecretKeyFactory factory = SecretKeyFactory.getInstance("PBEWithHmacSHA1AndAES_128");
+            PBEKeySpec spec = new PBEKeySpec(password.toCharArray());
+            SecretKey tmp = factory.generateSecret(spec);
+            SecretKey SecKey = new SecretKeySpec(tmp.getEncoded(), "AES");
+            SecretKey key = new SecretKeySpec(tmp.getEncoded(),"HmacSHA1");
+            //KeyGenerator KeyGen = KeyGenerator.getInstance("AES");
+            //KeyGen.init(128);
 
-            KeyGenerator KeyGen = KeyGenerator.getInstance("AES");
-            KeyGen.init(128);
-
-            SecretKey SecKey = KeyGen.generateKey();
+            //SecretKey SecKey = KeyGen.generateKey();
             // Need an IV: 
-            byte[] iv = new byte[16];
-            new Random().nextBytes(iv);
-            IvParameterSpec IV = new IvParameterSpec(iv);
+            IvParameterSpec IV = new IvParameterSpec(password.getBytes());
 
             byte[] ct = encrypt(str, key,SecKey,IV);
 
@@ -196,6 +199,8 @@ public class Lucky13
             System.out.println("NoSuchAlgorithmException raised as: "+e);
         } catch (UnsupportedEncodingException e) {  
             System.out.println("UnsupportedEncodingException raised as: "+e);
+        } catch (InvalidKeySpecException e) {
+            System.out.println("InvalidKeySpecException raised as: " + e);
         }
     }
 }
