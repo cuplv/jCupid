@@ -5,7 +5,7 @@ information leaks via physical properties---
 such as temperature, electromagnetic leaks, memory footprints, and timing
 delays---of the implementation rather than using brute force or exploiting
 theoretical weakness of the algorithm.
-Timing-based side-channel attacks are most common class of
+Timing-based side-channel attacks are a common class of
 side-channel attacks and are extremely powerful as physical isolation of the
 server does not help and it is easier to observe the timing differentials than
 temperature, memory, or electromagnetic leaks.  
@@ -39,23 +39,34 @@ $R := (R \cdot y) \mod n$\;
 
 A na\"ive remedy to timing-based information leaks in software-implemented
 systems is to make the software run in fixed time for all possible inputs by
+removing branches from code or
 introducing timers to delay the observable outputs. 
-However, it is quite difficult to ensure in practice, and even in the presence
-of such timers CPU usage may also leak same information.
+However, it is quite difficult to ensure in practice. For example, the Lucky 13
+attack was against a TLS implementation that was believed to be hardened against
+side-channel attacks, due to its lack of branches that leaked information to a
+remote attacker. However, there were subtle code paths that introduced branches
+into the code unbeknownst to the developers. These branches came in the form of
+how many bytes were hashed during verification of a payload, and were not easily
+visible in the code on first inspection. Nonetheless, these minute differences
+were enough to allow an attacker to perform a padding oracle attack and decrypt
+arbitrary ciphertext.
+
+%\section{Related Work} ?
+
 Molnar et al.~\cite{Molnar05} proposed to model side-channels with
 so-called \emph{transcript security model} where the sequence of certain
 observable variable (transcripts) is leaked to the attacker.
 Under this setting a program is secure if the adversary learns nothing about the
 secret value even after given access to the side-channel transcripts.
-Among others, program counters and opcodes, have been proposed as an appropriate
+Among others, program counters and opcodes have been proposed as an appropriate
 notion of observable variables for transcripts.
 Molnar et al.~\cite{Molnar05} present a run-time profiler for C programs to
-detect side-channels by reporting pair of inputs that differ in program-counter
-transcripts.  
+detect side-channels by reporting pairs of inputs that differ in program-counter
+transcripts.
 In this paper we propose a similar runtime profiler to test whether a given
 Java program is transcript secure where transcripts are Java Bytecode
 instructions for inputs of same size.
-Our framework, with some efforts, can be extended to more general notions of
+With some effort, our framework can be extended to more general notions of
 transcripts.
 
 Fuzz testing techniques~\cite{God12} are scalable and effective techniques for finding security
