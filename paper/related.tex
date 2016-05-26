@@ -5,19 +5,44 @@ information leaks via physical properties---
 such as temperature, electromagnetic leaks, memory footprints, and timing
 delays---of the implementation rather than using brute force or exploiting
 theoretical weakness of the algorithm.
-For our tool we focus on timing based information leaks in systems
-implemented in software. 
+Timing-based side-channel attacks are most common class of
+side-channel attacks and are extremely powerful as physical isolation of the
+server does not help and it is easier to observe the timing differentials than
+temperature, memory, or electromagnetic leaks.  
 Some notable examples of timing-based information leaks include \emph{padding oracle
-attack}~\cite{Vau02}, \emph{Lucky-13 attack}~\cite{al2013lucky},  Modular
-exponentiation algorithm employed in Diffie-Hellman, RSA, and
-DSS~\cite{kocher96}.
+attack}~\cite{Vau02}, \emph{Lucky-13 attack}~\cite{al2013lucky},  \emph{modular
+exponentiator} employed in Diffie-Hellman, RSA, and DSS~\cite{kocher96}.
+
+As an example of timing-based side-channel attack, consider modular
+exponentiator used in Diffie-Hellman and RSA operations.
+Here the system computes $R = y^x \mod n$ where $x$ is a secret key, $n$ is a
+public information, and for an attacker it is easy to get hold of $y$.
+In this attack the value $x$ of the secret key is fixed, and the attacker can
+observe system response time for various combinations of $y$ and $n$.
+A simple modular exponentiator algorithm is shown as Algorithm~\ref{alg:expo}.
+Observe that in this algorithm a timing side-channel exists as depending upon
+the value of the secret input, line $5$ may or may not be executed, and hence
+algorithm will do different computation for different values of secret key, and
+Kocher~\cite{kocher96} showed that it is sufficient to recover the secret key.
+\begin{algorithm}[t]
+Let $R = 1$\;
+\For {$k = 0$ upto $w-1$}{
+$R = R^2 \mod n$\;
+\If {$x[k] = 1$}{
+$R := (R \cdot y) \mod n$\;
+}
+}
+\Return $R$\;
+\caption{A Simple Modular Exponentiator Algorithm}
+\label{alg:expo}
+\end{algorithm}
 
 A na\"ive remedy to timing-based information leaks in software-implemented
 systems is to make the software run in fixed time for all possible inputs by
 introducing timers to delay the observable outputs. 
-However, it is quite difficult to ensure in practice, and moreover the often CPU
-usage may also leak information in this situation. 
-Transcript security model by Molnar et al.~\cite{Molnar05} is another way
+However, it is quite difficult to ensure in practice, and even in the presence
+of such timers CPU usage may also leak same information.
+Transcript security model, proposed by Molnar et al.~\cite{Molnar05} is another way
 to minimize information leak by requiring that for all confidential inputs, the
 observable outputs (sequence of program counter values or opcodes) are
 statistically indistinguishable.
