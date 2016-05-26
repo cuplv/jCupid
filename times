@@ -16,6 +16,12 @@ Mux: 5x10 its
     jCupid (just OpenJDK, no flags) - 16.4302847385
     jCupid (no hash) - 116.080359221
 
+repeatedSquaring: 5x10 its
+    java - 3.97058320045
+    jCupid - 122.678370953
+    jCupid (just OpenJDK, no flags) - 18.2125077248
+    jCupid (no hash) - 129.672127962 
+
 
 per instruction table
 
@@ -27,5 +33,7 @@ SumRandomBytes:    10.063        13.876              13.234                  12.
 
 Mux:               0.069         2.347               0.328                   2.321
 
+repeatedSquaring:  0.079         2.453               0.364                   2.593
+
 --------------------------------------------------------------------------------------
-Averaged:          3.400         6.193               4.629                   5.585
+Averaged:          2.569         5.258               3.563                   4.837
