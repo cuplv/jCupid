@@ -35,6 +35,27 @@ public class repeatedSquaring
         return R;
     }
 
+    public static long montLadder(int base, long power, int mod)
+    {
+        long x1 = base;
+        long x2 = base*base;
+        int started = 0;
+        int i;
+        for (i=63; i>=0; i--) {
+
+            int bit_set = ((int)(power >> i) & 0x01);
+
+            long t_x1 = ((1-bit_set)*(x1*x1)) + (bit_set)*(x1*x2);
+            long t_x2 = ((1-bit_set)*(x1*x2)) + (bit_set)*(x2*x2);
+
+            x1 = (1-started)*x1 + started*(t_x1 % mod);
+            x2 = (1-started)*x2 + started*(t_x2 % mod);
+
+            started |= (bit_set);
+        }
+        return x1;
+    }
+
     public static void main(String [] args)
     {
         Scanner sc = new Scanner(System.in);
@@ -42,13 +63,17 @@ public class repeatedSquaring
 
         long num = stringToLong(s,100);
 
+
         int prime = 2357;
         //int prime = 5;
         int g = 1415;
         //int g = 2;
 
         int res = repeatedSquare(g,num,prime);
+        long res2 = montLadder(g, num, prime);
 
+        System.out.println("num = " + num);
         System.out.println("res = " + res);
+        System.out.println("res2= " + res2);
     }
 }
