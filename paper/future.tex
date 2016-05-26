@@ -11,13 +11,13 @@ given constraints, such as input length.
 
 Another interesting avenue is to refine this tool to examine the types
 of differences we see in bytecode execution. In particular, it may be
-that certain programs are written so that there are no timing
-difference, but there are bytecode execution differences. As the goal
-of the tool is to find timing side channels, this would lead to
+that in certain programs, there are no timing
+differences, but the sequences of executed bytecodes are different. As
+the goal of the tool is to find timing side channels, this would lead to
 false positives. Thus it would be interesting to 
 collect bytecodes into equivalence classes by time and allowing
 differences in execution within these classes. 
 
 This project was written for Java programs, it would be a noteworthy
 extension to continue this project in C to let a greater audience
-access to this tool. 
+access the tool. 
