@@ -50,58 +50,69 @@ memory accesses.
 
 
 
-
-
 For each of these programs, we allowed them to take a single input as a string
-on standard input. Then, we allowed jCupid to fuzz these programs with random
+on standard input. Then, we allowed \jcupid to fuzz these programs with random
 inputs, and look for potential differences in the bytecodes executed. In each
-example, we found the intended side-channel, and jCupid was able to correctly
+example, we found the intended side-channel, and \jcupid was able to correctly
 determine the line of code responsible.
 
-We then corrected the problems identified by jCupid, and reran our tool to
-verify we had removed the offending side-channels. To our surprise, jCupid
-identified additional problems in our ``corrected'' programs. For example, in
+We then corrected the problems identified by \jcupid, and reran our tool to
+verify we had removed the offending side-channels. To our surprise, \jcupid
+identified additional problems in some of our ``corrected'' programs. For example, in
 the password checking program, we used a temporary value, and updated it at each
 iteration with $ good \&= (input[i] == expected[i]) $. However, this resulted in
 a side-channel when computing the $ == $ operator, as Java implemented this as a
 branch in the bytecode. We fixed this by switching to using exclusive-or to
-compare the values, and jCupid did not detect any additional side-channels. This
+compare the values, and \jcupid did not detect any additional side-channels. This
 further illustrates the difficulty of removing all potential side-channels from
 code: even seemingly branch-free programs, written with the intention of not
 having side-channels, can contain them.
 
 
-As jCupid is a dynamic analysis tool, it must run many instances of the program
-in order to find side-channel behavior. We evaluated jCupid's overhead by
-measuring how quickly it can run basic Java programs, and compared it to running
-those same programs outside of the jCupid environment. Particularly for a
-developer dynamic analysis tool, our results are encouraging: per run, jCupid
-only adds approximately X\% of overhead. This could allow even rare
-side-channels to be detected with na\"{\i}ve fuzzing of nightly builds over unit
-tests.
+As \jcupid is a dynamic analysis tool, it must run many instances of the program
+in order to find side-channel behavior. We evaluated \jcupid's overhead by
+measuring how quickly it can run basic Java programs, and compared it to
+running those same programs outside of the \jcupid environment. Particularly for
+a developer dynamic analysis tool that inspects individual bytecodes, our
+results are encouraging: per run, \jcupid only adds on average approximatly 2x
+overhead. This could allow even rare side-channels to be detected with
+na\"{\i}ve fuzzing of nightly builds over unit tests.
 
 \paragraph{Timing experimentation}
-In order to test the efficiency of jCupid, we ran a number of experiments to
-determine how much overhead jCupid has, and where the overhead comes from.
-With the above test programs we ran number of tests based on the modifications
-we had made. We ran each test program 10 times with OpenJDK, but no flags added
-to get a base value, then we ran the programs with our tool, telling it to use
-at most 10 iterations, and ensured that our tool would not catch any differences
-with the inputs. Then we ran the programs with a modified version of our tool 
-which simply calls OpenJDK, with no flags -- this allows us to test how much 
-overhead the tool itself has. Finally we run the tool on a modified OpenJDK such
-that the hash function does no work (meaning nothing will be flagged) -- this 
-tells us how much time our hash function is taking. Each of the above tests are 
-run 5 times.
+In order to test the efficiency of \jcupid, we ran a number of experiments to
+determine how much overhead \jcupid has, and where the overhead comes from.
+With the above test programs, we ran each program 10 times with an unmodified
+OpenJDK. Then, we ran each program using our tool with 10 iterations. Over all
+of the runs, we found that stock OpenJDK took on average 2.6 seconds per
+iteration, while \jcupid took on average 5.3 seconds per iteration. However, this
+is obviously variable based on the input program: for longer running and more
+computationally-expensive programs, \jcupid's overhead is lower.
 
-Averaging the time results across the different programs provides the following
-results: just calling OpenJDK takes around 2.6 seconds, jCupid averages 5.3 seconds
-per call to OpenJDK. This is an overhead of 2.7 seconds. The following two results
-will help us determine where this overhead comes from. With the modified jCupid tool
-that just calls OpenJDK with no flags takes 3.6 seconds, and finally calling jCupid
-that calls a modified OpenJDK that does not do hashing takes 4.8 seconds.
+To determine which components of \jcupid are responsible for its overhead, we
+removed individual components and reran our programs. We ran our python tool in
+a way that it called a normal OpenJDK rather than our modified (debug) one, and
+found that it took on average 3.6 seconds per run. We then ran our tool using a
+modified version of OpenJDK that did not use hashing, and found it takes 4.8
+seconds. Thus, we estimate that our python tool adds about half of the overhead
+of \jcupid,
+with the remainder coming mainly from the debug version of OpenJDK, and a small
+contribution from the fast hash function itself.
 
-The above results tell us that of the 2.7 seconds of overhead 1.0 seconds of overhead
-come from the tool itself, and 1.2 second of overhead comes from the flags that
-we use in jCupid. Thus the remaining 0.5 seconds of overhead come from the hash
-function itself.
+%with the inputs. Then we ran the programs with a modified version of our tool 
+%which simply calls OpenJDK, with no flags -- this allows us to test how much 
+%overhead the tool itself has. Finally we run the tool on a modified OpenJDK such
+%that the hash function does no work (meaning nothing will be flagged) -- this 
+%tells us how much time our hash function is taking. Each of the above tests are 
+%run 5 times.
+%
+%Averaging the time results across the different programs provides the following
+%results: just calling OpenJDK takes around 2.6 seconds, \jcupid averages 5.3 seconds
+%per call to OpenJDK. This is an overhead of 2.7 seconds. The following two results
+%will help us determine where this overhead comes from. With the modified jCupid tool
+%that just calls OpenJDK with no flags takes 3.6 seconds, and finally calling jCupid
+%that calls a modified OpenJDK that does not do hashing takes 4.8 seconds.
+%
+%The above results tell us that of the 2.7 seconds of overhead 1.0 seconds of overhead
+%come from the tool itself, and 1.2 second of overhead comes from the flags that
+%we use in jCupid. Thus the remaining 0.5 seconds of overhead come from the hash
+%function itself.
