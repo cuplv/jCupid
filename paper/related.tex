@@ -51,6 +51,16 @@ visible in the code on first inspection. Nonetheless, these minute differences
 were enough to allow an attacker to perform a padding oracle attack and decrypt
 arbitrary ciphertext.
 
+In this paper we present a tool, \jcupid, that helps developers discover
+potential timing side-channel vulnerabilities in their Java code. \jcupid
+functions by dynamically executing a provided program with same-length inputs,
+and attempts to find two inputs that produce divergent bytecode executions at
+runtime. By using bytecodes as a proxy for time, we eliminate the problem of
+our timers being less accurate or fine-grained than that of potential
+adversaries. Although our tool may detect side-channels that may not be currently
+detectable (such as single bytecode differenes in execution), time has shown
+that attacks only get better over time.
+
 \subsection{Related Work} 
 
 Molnar et al.~\cite{Molnar05} proposed to model side-channels with
