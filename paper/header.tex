@@ -38,6 +38,26 @@
 \usepackage{pgflibrarysnakes}
 \usepackage{xspace}
 
+\usepackage{paralist}
+
+%%Redefines lncs paragraph to have a bold title
+\makeatletter
+\renewcommand\paragraph{\@startsection{paragraph}{4}{\z@}%
+                        {-12\p@ \@plus -4\p@ \@minus -4\p@}%
+                        {-0.5em \@plus -0.22em \@minus -0.1em}%
+                        {\normalfont\normalsize\bfseries}}
+\makeatother
+
+%% Save the class definition of \subparagraph
+\let\llncssubparagraph\subparagraph
+%% Provide a definition to \subparagraph to keep titlesec happy
+\let\subparagraph\paragraph
+%% Load titlesec
+\usepackage[compact]{titlesec}
+%% Revert \subparagraph to the llncs definition
+\let\subparagraph\llncssubparagraph
+
+
 \newcommand{\jcupid}{\textsc{jCupid}\xspace}
 
 \newcommand{\set}[1]{\left\{ #1 \right\}}

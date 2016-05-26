@@ -51,7 +51,7 @@ visible in the code on first inspection. Nonetheless, these minute differences
 were enough to allow an attacker to perform a padding oracle attack and decrypt
 arbitrary ciphertext.
 
-%\section{Related Work} ?
+\subsection{Related Work} 
 
 Molnar et al.~\cite{Molnar05} proposed to model side-channels with
 so-called \emph{transcript security model} where the sequence of certain
@@ -89,10 +89,20 @@ The run-time profiling framework that we propose in this paper can be
 effectively combined with both blackbox and whitebox fuzz testing techniques to
 automate generation of interesting inputs.
 
-An issue related to testing and verification of transcript security of a program
-is the automatic synthesis of transcript-secure programs from un-secure ones.
-Eldib and Wang~\cite{EW14} proposed a synthesis method (and tool SC Masker)
-based on LLVM compiler and Yices SMT solver to produce a perfectly-masked
+Verification and static analysis techniques have been developed for
+analysis of confidentiality properties and side channel information
+leakage~\cite{EWS14,KMO12,BSB07,BDG12,CA09}. The strength of these
+works lies in the fact that they provide a specification language that
+allows the developer to specify the confidentiality requirement
+tailored to the application. In contrast, our tool has one
+(generic) notion of confidentiality, but is much more lightweight and
+scalable. 
+
+An issue related to testing and verification of transcript security of
+a program is the automatic synthesis of transcript-secure programs
+from un-secure ones. Eldib and Wang~\cite{EW14} proposed a synthesis
+method (and tool SC Masker) based on LLVM compiler and Yices SMT
+solver to produce a perfectly-masked 
 program such that resulting program is such that all the observable outputs are
 statistically independent from the input data. 
 Prouff and Rivain~\cite{PR13} outline a formal security proof for masked
