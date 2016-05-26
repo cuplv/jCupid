@@ -67,3 +67,30 @@ developer dynamic analysis tool, our results are encouraging: per run, jCupid
 only adds approximately X\% of overhead. This could allow even rare
 side-channels to be detected with na\"{\i}ve fuzzing of nightly builds over unit
 tests.
+
+\paragraph{Timing experimentation}
+In order to test the efficiency of jCupid, we ran a number of experiments to
+determine how much overhead jCupid has, and where the overhead comes from.
+With the above test programs we ran number of tests based on the modifications
+we had made. We ran each test program 10 times with OpenJDK, but no flags added
+to get a base value, then we ran the programs with our tool, telling it to use
+at most 10 iterations, and ensured that our tool would not catch any differences
+with the inputs. Then we ran the programs with a modified version of our tool 
+which simply calls OpenJDK, with no flags -- this allows us to test how much 
+overhead the tool itself has. Finally we run the tool on a modified OpenJDK such
+that the hash function does no work (meaning nothing will be flagged) -- this 
+tells us how much time our hash function is taking. Each of the above tests are 
+run 5 times.
+
+Averaging the time results across the different programs provides the following
+results: just calling OpenJDK takes around 3.4 seconds, jCupid averages 6.2 seconds
+per call to OpenJDK. This is an overhead of 2.8 seconds. The following two results
+will help us determine where this overhead comes from. With the modified jCupid tool
+that just calls OpenJDK with no flags takes 4.6 seconds, and finally calling jCupid
+that calls a modified OpenJDK that does not do hashing takes 5.6 seconds.
+
+The above results tell us that of the 2.8 seconds of overhead 1.2 seconds of overhead
+come from the tool itself, and 1.0 second of overhead comes from the flags that
+we use in jCupid. Thus the remaining 0.6 seconds of overhead come from the hash
+function itself.
+\paragraph
