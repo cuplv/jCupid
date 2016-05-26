@@ -1,0 +1,31 @@
+PasswordChecker: 5x10 its
+    java - 3.4441280365
+    jCupid - 117.835131884 
+    jCupid (just OpenJDK, no flags) - 16.3363370895
+    jCupid (no hash) - 117.155548811
+    
+SumRandomBytes: 5x10 its
+    java - 503.150344133
+    jCupid - 693.825140953
+    jCupid (just OpenJDK, no flags) - 661.737612009 
+    jCupid (no hash) - 604.588545799
+
+Mux: 5x10 its
+    java - 3.45006370544
+    jCupid - 117.363423109
+    jCupid (just OpenJDK, no flags) - 16.4302847385
+    jCupid (no hash) - 116.080359221
+
+
+per instruction table
+
+                   openJDK     jCupid(full)       (jCupid, justJDK)       jCupid (no hash)
+
+Password checker:  0.068         2.356               0.326                   2.343 
+
+SumRandomBytes:    10.063        13.876              13.234                  12.0917
+
+Mux:               0.069         2.347               0.328                   2.321
+
+--------------------------------------------------------------------------------------
+Averaged:          3.400         6.193               4.629                   5.585
