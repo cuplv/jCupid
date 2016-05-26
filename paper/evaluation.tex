@@ -16,12 +16,22 @@ password checking test case, this pattern also occurs in any string comparison
 that should be done in constant time, such as when checking if CSRF or
 authentication tokens are valid.
 
-\paragraph{Lucky-13 attack}
-We implemented a toy Java version of the padding and MAC check employed in TLS
-decryption. Our implementation was vulnerable to the Lucky 13 attack, where
-an attacker modifies ciphertext, and can distinguish between the corresponding
-plaintext having valid padding or not. This capability allows an attacker to
-perform a Vaudenay attack and iteratively leak the plaintext.
+%\paragraph{Lucky-13 attack}
+%We implemented a toy Java version of the padding and MAC check employed in TLS
+%decryption. Our implementation was vulnerable to the Lucky 13 attack, where
+%an attacker modifies ciphertext, and can distinguish between the corresponding
+%plaintext having valid padding or not. This capability allows an attacker to
+%perform a Vaudenay attack and iteratively leak the plaintext.
+
+\paragraph{Modular Exponentiation}
+We implemented the basic method for modular exponentiation shown in
+Algorithm~\ref{alg:expo}. This algorithm has a side-channel dependent on the
+(private) exponent input. We also implemented a variant on the Montgomery Ladder
+technique for modular exponentiation, however, we had to use algebric tricks to
+replace the branches that are present in that algorithm. Our version has no
+data-dependent branches, and relies only on multiplication, addition,
+subtraction, and modulo.
+
 
 \paragraph{SumBytes}
 We created a program that reads a single byte to determine a length, then reads
@@ -37,6 +47,8 @@ a selector. If the selector is true, our function returns the first input,
 otherwise it returns the second input. This is easily accomplished by an if
 statement, however, such an implementation may leak information due to instruction cache timing or
 memory accesses.
+
+
 
 
 
