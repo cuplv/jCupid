@@ -61,7 +61,7 @@ public class repeatedSquaring
         Scanner sc = new Scanner(System.in);
         String s = sc.nextLine();
 
-        long num = stringToLong(s,100);
+        long num = stringToLong(s,96);
 
 
         int prime = 2357;
