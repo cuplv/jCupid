@@ -26,9 +26,9 @@ authentication tokens are valid.
 \paragraph{Modular Exponentiation}
 We implemented the basic method for modular exponentiation shown in
 Algorithm~\ref{alg:expo}. This algorithm has a side-channel dependent on the
-(private) exponent input. We also implemented a variant on the Montgomery Ladder
+(private) exponent input. To compare a fix, we also implemented a variant on the Montgomery Ladder
 technique for modular exponentiation, however, we had to use algebric tricks to
-replace the branches that are present in that algorithm. Our version has no
+replace the branches that are present in the algorithm. Our updated version has no
 data-dependent branches, and relies only on multiplication, addition,
 subtraction, and modulo.
 
