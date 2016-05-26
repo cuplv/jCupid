@@ -42,23 +42,26 @@ systems is to make the software run in fixed time for all possible inputs by
 introducing timers to delay the observable outputs. 
 However, it is quite difficult to ensure in practice, and even in the presence
 of such timers CPU usage may also leak same information.
-Transcript security model, proposed by Molnar et al.~\cite{Molnar05} is another way
-to minimize information leak by requiring that for all confidential inputs, the
-observable outputs (sequence of program counter values or opcodes) are
-statistically indistinguishable.
+Molnar et al.~\cite{Molnar05} proposed to model side-channels with
+so-called \emph{transcript security model} where the sequence of certain
+observable variable (transcripts) is leaked to the attacker.
+Under this setting a program is secure if the adversary learns nothing about the
+secret value even after given access to the side-channel transcripts.
+Among others, program counters and opcodes, have been proposed as an appropriate
+notion of observable variables for transcripts.
 Molnar et al.~\cite{Molnar05} present a run-time profiler for C programs to
 detect side-channels by reporting pair of inputs that differ in program-counter
 transcripts.  
-In our work, we propose a similar runtime profiler to test whether a given
+In this paper we propose a similar runtime profiler to test whether a given
 Java program is transcript secure where transcripts are Java Bytecode
 instructions for inputs of same size.
 Our framework, with some efforts, can be extended to more general notions of
-transcripts. 
+transcripts.
 
-Fuzz testing~\cite{God12} is a scalable and effective techniques for finding security
+Fuzz testing techniques~\cite{God12} are scalable and effective techniques for finding security
 vulnerability in software.
-Fuzz testing techniques can naturally be partitioned into blackbox fuzz testing 
-and whitebox fuzz-testing. 
+Godefroid, Levin, and Molnar~\cite{God12} popularized the distinction between
+blackbox and whitebox fuzz-testing techniques.
 In blackbox fuzz-testing approach well-formed inputs are randomly modified,
 while conforming to a template given as formal grammar and probabilistic
 weights, to generate other potentially interesting inputs.  
@@ -72,16 +75,31 @@ negating conditions exercised by previous test-cases.
 CUTE and jCUTE~\cite{Sen2006} are popular whitebox fuzzing tools for C and Java
 programs. 
 The run-time profiling framework that we propose in this paper can be
-effectively used with both blackbox and whitebox fuzz testing techniques to
-generate set of interesting inputs.
+effectively combined with both blackbox and whitebox fuzz testing techniques to
+automate generation of interesting inputs.
 
+An issue related to testing and verification of transcript security of a program
+is the automatic synthesis of transcript-secure programs from un-secure ones.
+Eldib and Wang~\cite{EW14} proposed a synthesis method (and tool SC Masker)
+based on LLVM compiler and Yices SMT solver to produce a perfectly-masked
+program such that resulting program is such that all the observable outputs are
+statistically independent from the input data. 
+Prouff and Rivain~\cite{PR13} outline a formal security proof for masked
+implementations of block ciphers.      
 
-
-Synthesis of masking countermeasures against side-channel attacks~\cite{EW14}
-secure information flow~\cite{Den76}, TaintDroid~\cite{Enck14}, Dynamic and
-Static Information Flow~\cite{SR10}.
-quantitative information flow~\cite{smith09}
-
+For a background on formal quantitative information flow we refer the reader to
+an excellent introductory article by Smith~\cite{smith09} and references therein.
+Static and dynamic information flow techniques~\cite{SR10,Den76} have concentrated
+mainly upon explicit and implicit information flow from secret variables to
+outputs or observable variables.
+However, side-channel information is often not explicitly present in the text
+(source code or bytecode) of the program.
+A key challenge under this assumption is to make this timing side-channel
+explicit by learning timing function of various program units in the software
+and use them to either statically analyze the software for side-channel freedom,
+or use run-time profilers to execute inputs of similar size such that the
+observable input differs.
+Our tool is an attempt in this direction.
 
 %% \subsection{Old Part}
 %% The idea monitoring executed bytecodes is not dissimilar to that of finding all
