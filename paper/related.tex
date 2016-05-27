@@ -13,6 +13,21 @@ Some notable examples of timing-based information leaks include \emph{padding or
 attack}~\cite{Vau02}, \emph{Lucky-13 attack}~\cite{al2013lucky},  \emph{modular
 exponentiator} employed in Diffie-Hellman, RSA, and DSS~\cite{kocher96}.
 
+\begin{algorithm}[t]
+  \caption{A simple modular exponentiator algorithm with a secret-dependent side-channel vulnerability}
+  \label{alg:expo}
+  \begin{algorithmic}[1]
+    \State  Let $R = 1$
+    \For {$k = 0$ upto $w-1$}
+    \State  $R = R^2 \mod n$
+    \If {$x[k] = 1$}
+    \State  $R := (R \cdot y) \mod n$
+    \EndIf
+    \EndFor
+    \State \textbf{return} $R$
+  \end{algorithmic}
+\end{algorithm}
+
 As an example of timing-based side-channel attack, consider modular
 exponentiator used in the Diffie-Hellman and RSA cryptographic operations.
 Here the system computes $R = y^x \mod n$ where $x$ is a secret key, $n$ is
@@ -24,18 +39,6 @@ Observe that in this algorithm a timing side-channel exists: depending upon
 the value of the secret input, line $5$ may or may not be executed, and hence
 the algorithm will do different computation for different values of secret key.
 This data-dependent side-channel has been shown by Kocher~\cite{kocher96} to be sufficient to recover the secret key.
-\begin{algorithm}[t]
-Let $R = 1$\;
-\For {$k = 0$ upto $w-1$}{
-$R = R^2 \mod n$\;
-\If {$x[k] = 1$}{
-$R := (R \cdot y) \mod n$\;
-}
-}
-\Return $R$\;
-\caption{A simple modular exponentiator algorithm with a secret-dependent side-channel vulnerability}
-\label{alg:expo}
-\end{algorithm}
 
 A na\"ive remedy to timing-based information leaks in software-implemented
 systems is to make the software run in fixed time for all possible inputs by
@@ -56,7 +59,7 @@ effort to remove all future potential timing attacks that might exist in this
 code. This effort took multiple iterations, and included attempts that still
 contained inadvertant and subtle side-channels~\cite{agl-lucky13}.
 
-In this paper we present a tool, \jcupid, that helps developers discover
+We present a tool, \jcupid, that helps developers discover
 potential timing side-channel vulnerabilities in their Java code. \jcupid
 functions by dynamically executing a provided program with same-length inputs,
 and attempts to find two inputs that produce divergent bytecode executions at
@@ -68,8 +71,7 @@ that attacks only get better. As these attacks improve, attackers are
 able to use finer-resolution timers and techniques to discover subtle
 differences in execution. Therefore, we are conservative and assume that even
 tiny differences may be potentially observable.
-
-We use \jcupid to find simple common and subtle side-channels in several
+\jcupid can be used to find simple common and subtle side-channels in several
 programs, including modular exponentiation, password checking, and others. We
 also test \jcupid against fixed versions of these programs, verifying that it
 does not identify any ``false-positives''. With some developer effort, this tool
@@ -91,8 +93,7 @@ transcripts.
 In this paper we propose a similar runtime profiler to test whether a given
 Java program is transcript secure where transcripts are Java bytecode
 instructions for inputs of same size.
-With some effort, our framework can be extended to more general notions of
-transcripts.
+With some effort, our framework can be extended to more general transcripts.
 
 Fuzz testing techniques~\cite{God12} are scalable and effective techniques for finding security
 vulnerability in software.
@@ -145,7 +146,7 @@ explicit by learning timing function of various program units in the software
 and use them to either statically analyze the software for side-channel freedom,
 or use run-time profilers to execute inputs of similar size such that the
 observable input differs.
-Our tool is an attempt in this direction.
+The tool \jcupid reported in this paper is an attempt in this direction.
 
 %% \subsection{Old Part}
 %% The idea monitoring executed bytecodes is not dissimilar to that of finding all

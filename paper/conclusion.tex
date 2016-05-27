@@ -1,23 +1,24 @@
-Timing side-channels are a great concern when developing 
-secure programs. With \jcupid, we hope to aid developers in writing
-code that is timing side-channel free. In order to find the side
-channels, \jcupid 
-tracks the sequence of bytecodes that are executed for multiple inputs
-of the same size. Once two inputs are found that cause a different
-sequence of bytecodes to be executed, \jcupid can inform the developer
-of the line that caused the
-divergence. We show that in this way \jcupid can detect side channel
-bugs using a series of case studies (and we show that \jcupid does not
-detect bugs in the corrected versions).
+Timing based side-channels are a matter of great concern when developing 
+secure programs.
+We hope that \jcupid can aid developers in testing and detecting side-channels
+in program during development. 
+In order to find the side channels, \jcupid  tracks the sequence of bytecodes
+that are executed for multiple inputs of the same size.
+Once two inputs are found that cause a different sequence of bytecodes to be
+executed, \jcupid can inform the developer of the line that caused the
+divergence.
+We show that in this way \jcupid can detect side channel bugs using a series of
+case studies (and we show that \jcupid does not detect bugs in the corrected
+versions). 
+ 
+\jcupid is intended to be used by developers to test very specific aspects of
+their code.
+Running \jcupid on even moderately sized  projects---say an authentication
+server---will most certainly find different bytecodes executed based on input
+(even of the same length).
+This tool is intended as a more precise tool:--instead of analyzing the whole
+server, the tool is intended to analyze whether the crucial parts of the program
+(such as modular exponentiation function) execute different bytecodes for inputs
+of the same size (and thus for instance reveals information about bits in the
+secret key).  
 
-This tool is intended to be used by developers to test very
-specific aspects of their code. Running \jcupid on even moderately sized
-projects, say an authentication server, will most
-certainly find different bytecodes executed based on input (even of
-the same length). \jcupid is intended as a more precise tool. Instead of 
-analyzing the whole server, the tool is
-intended to analyze whether the modular exponentiation function
-executes different bytecodes for inputs of the same size (and thus for
-instance reveals information about bits in the secret key). 
-
-\jcupid is available via \url{https://github.com/cuplv/jCupid} and an appendix follows our References which describes a demo of our tool. 

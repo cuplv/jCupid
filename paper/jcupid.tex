@@ -1,13 +1,16 @@
+At a higher level, \jcupid consists of a Python wrapper around a modified
+version of OpenJDK (\url{http://openjdk.java.net/}). 
+The Python wrapper executes the program under test repeatedly through a modified
+OpenJDK, to explore two inputs of same size that result in different bytecode
+executions.
+\jcupid implements several optimizations to make this performant, which we
+detail below. 
 
-\jcupid consists of a Python script that wraps a modified version of OpenJDK.
-Our Python wrapper runs a specified program multiple times through our modified
-OpenJDK, looking for two inputs that provide different bytecodes executed. We
-have several optimizations to make this performant, which we detail in this
-section.
-
-\subsection{OpenJDK}
+%\subsection{OpenJDK (Open Java Development Kit)}
+\paragraph{OpenJDK (Open Java Development Kit).}
 \label{sec:OpenJDK}
-
+OpenJDK is an open source implementation of the Java Platform, Standard Edition
+(Java SE). 
 While OpenJDK already provides a feature for printing out executed bytecodes in
 debug mode (with the \texttt{-XX:+TraceBytecodes} flag), we found that using
 this feature for our tool proved to be decidedly too slow. In addition,
@@ -18,13 +21,12 @@ the \texttt{main} method. In addition, even just running this simple program
 takes 8.6 seconds to execute using the \texttt{-XX:+TraceBytecodes} flag.
 % 1,179,829 bytecodes executed total
 
-Rather than using the \texttt{-XX:+TraceBytecodes} option and inspecting the
+Instead of using the \texttt{-XX:+TraceBytecodes} option and inspecting the
 output to determine the bytecodes executed for a given program run, we modified
 OpenJDK and added a new feature that hashed the bytecodes as they were executed,
-and then printed out the final hash after the program terminated. As we do not
-need a cryptographic hash for this purpose, we used the lightweight djb2 hash
-function~\cite{djb2Hash}.
-
+and then printed out the final hash after the program terminated.
+Since we do not need a cryptographic hash for this purpose, we used the
+lightweight djb2 hash function~\cite{djb2Hash}.
 In addition to hashing, we also added a feature to allow the user
 to specify the class and method for when this hashing should start and end, so
 that extraneous bytecodes executed during program initialization can be ignored.
@@ -44,8 +46,8 @@ compares their outputs to detect the deviation.
 %To help in this we modified OpenJDK to allow for new flags: \texttt{-hashClass}, \texttt{-hashMethod}, \texttt{-traceClass}, and \texttt{-traceMethod}. Each takes an argument, a class name or method name respectively. The \texttt{-hashClass} and \texttt{-hashMethod} flags are used together as are the trace variants. Their arguments dictate the class and method that we are interested in. For example in Listing~\ref{lst:ex} we would be interested in the class \texttt{SumRandomBytes} and the method \texttt{main}. Though in general the user could specify any class/method in their program. 
 
 
-\subsection{Inputs}
-
+%\subsection{Input Generation}
+\paragraph{Input Generation.}
 \jcupid chooses inputs automatically, attempting to find two inputs that produce
 different execution traces. \jcupid can generate inputs in two ways. First, it
 can generate a random string input, such as the ones used for our sample
@@ -57,7 +59,8 @@ former method, generating random strings of the same length as inputs to our
 programs.
 
 
-\subsection{Informing the Developer}
+%\subsection{Informing the Developer}
+\paragraph{Informing the Developer.}
 
 Once we find two inputs that produce different execution traces, \jcupid will
 use the \texttt{-XX:+TraceBytecodes} flag, and find the differing bytecodes. It

@@ -7,7 +7,10 @@
 
 \begin{document}
 
-\title{\textsc{jCupid}: A dynamic analysis tool for detecting side channels in Java programs}
+\title{\textsc{jCupid}\thanks{\jcupid is available via
+    \url{https://github.com/cuplv/jCupid} and a demo of \jcupid is provided  as
+    an appendix to this submission.}: A dynamic analysis tool for detecting side channels in
+  Java programs}
 \author{
   Ian Martiny
   \and
@@ -41,10 +44,10 @@
   Once two inputs are found that cause a different sequence of bytecodes to be
   executed, \jcupid can inform the developer of the offending line of source code
   responsible for the divergence.
-  While our tool can naively fuzz an instrumented program, it can also be used
+  While our tool can na\"ively fuzz an instrumented program, it can also be used
   in conjuction with a concolic execution testing engine.
   We show that instrumenting programs for use with \jcupid is simple for
-  developers, and that our tool can reveal timing side-channel vulnerabilities
+  developers, and it can reveal timing side-channel vulnerabilities
   that are not immediately obvious from source code inspection.
 \end{abstract}
 
@@ -55,7 +58,7 @@
 \input{introduction}
 
 
-\section{\textsc{jCupid}}
+\section{\textsc{jCupid}: High-Level architecture}
 \label{sec:jcupid}
 \input{jcupid}
 
@@ -63,14 +66,13 @@
 \label{sec:evaluation}
 \input{evaluation}
 
-\section{Future Work}
-\label{sec:future}
-\input{future}
+%\section{Future Work}
+%\label{sec:future}
 
-\section{Conclusion}
+\section{Conclusion and Future Work} 
 \label{sec:conclusion}
 \input{conclusion}
-
+\input{future}
 
 \bibliographystyle{plain}
 \bibliography{papers}
