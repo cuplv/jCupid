@@ -9,7 +9,7 @@ returning failure on the first discovered difference. This results in a side
 channel that leaks the number of characters that an attacker has guessed
 correctly, allowing them to perform an adaptive attack. The attacker can guess
 each character independently, and only move on to the next character when they
-have found the correct character in the current position. While we call this a
+have found the correct character for the current position. While we call this a
 password checking test case, this pattern also occurs in any string comparison
 that should be done in constant time, such as when checking if CSRF or
 authentication tokens are valid.

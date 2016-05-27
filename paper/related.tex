@@ -1,6 +1,6 @@
 %% Attacks
 Side-channel attacks are the class of attacks on cryptographic system that
-attempt to gain information about a system by by exploiting involuntary
+attempt to gain information about a system by exploiting involuntary
 information leaks via physical properties---
 such as temperature, electromagnetic leaks, memory footprints, and timing
 delays---of the implementation rather than using brute force or exploiting
@@ -59,7 +59,9 @@ effort to remove all future potential timing attacks that might exist in this
 code. This effort took multiple iterations, and included attempts that still
 contained inadvertant and subtle side-channels~\cite{agl-lucky13}.
 
-We present a tool, \jcupid, that helps developers discover
+We present a tool, \jcupid\footnote{\jcupid is available via 
+\url{https://github.com/cuplv/jCupid} and a demo of \jcupid is provided as
+an appendix to this submission.}, that helps developers discover
 potential timing side-channel vulnerabilities in their Java code. \jcupid
 functions by dynamically executing a provided program with same-length inputs,
 and attempts to find two inputs that produce divergent bytecode executions at
@@ -71,7 +73,7 @@ that attacks only get better. As these attacks improve, attackers are
 able to use finer-resolution timers and techniques to discover subtle
 differences in execution. Therefore, we are conservative and assume that even
 tiny differences may be potentially observable.
-\jcupid can be used to find simple common and subtle side-channels in several
+\jcupid can be used to find simple, common and subtle side-channels in several
 programs, including modular exponentiation, password checking, and others. We
 also test \jcupid against fixed versions of these programs, verifying that it
 does not identify any ``false-positives''. With some developer effort, this tool

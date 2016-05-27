@@ -1,7 +1,7 @@
 At a higher level, \jcupid consists of a Python wrapper around a modified
 version of OpenJDK (\url{http://openjdk.java.net/}). 
-The Python wrapper executes the program under test repeatedly through a modified
-OpenJDK, to explore two inputs of same size that result in different bytecode
+The Python wrapper executes the program repeatedly through a modified
+OpenJDK, to explore for two inputs of same size that result in different bytecode
 executions.
 \jcupid implements several optimizations to make this performant, which we
 detail below. 
@@ -33,7 +33,7 @@ that extraneous bytecodes executed during program initialization can be ignored.
 This feature is also available during the use of the
 \texttt{-XX:+TraceBytecodes} option, limiting the bytecodes that are printed to
 the method specified by the user. With these two features, a simple ``Hello
-World'' program can be run in about 0.8 seconds, ten times faster than using
+World'' program can be run in about 0.8 seconds, ten times faster than solely using
 the \texttt{-XX:+TraceBytecodes} flag.
 
 With this feature, our Python wrapper can simply generate inputs, and receive
