@@ -62,9 +62,9 @@ functions by dynamically executing a provided program with same-length inputs,
 and attempts to find two inputs that produce divergent bytecode executions at
 runtime. By using bytecodes as a proxy for time, we eliminate the problem of
 our timers being less accurate or fine-grained than that of potential
-adversaries. Although our tool may detect side-channels that may not be currently
-practically exploitable (such as single bytecode differences in execution), time has shown
-that attacks only get better over time. As these attacks improve, attackers are
+adversaries. Although our tool detects side-channels that may not be currently
+practical to exploit (such as single bytecode differences in execution), time has shown
+that attacks only get better. As these attacks improve, attackers are
 able to use finer-resolution timers and techniques to discover subtle
 differences in execution. Therefore, we are conservative and assume that even
 tiny differences may be potentially observable.
