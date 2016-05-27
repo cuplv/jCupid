@@ -2,35 +2,34 @@
 
 \section{Appendix: \jcupid demo}
 
-Presenter (P): \jcupid is a python script wrapped around a modified version of OpenJDK. \jcupid's goal
-is to assist developers in fixing timing vulnerabilities in their code. The user would provide a sample
-Java program and specific method to test for timing vulnerabilities. \jcupid would then choose various
-inputs to give to the program and examine the bytecodes that are executed.
+Presenter (P): \jcupid is a Python script wrapped around a modified version of OpenJDK. \jcupid's goal
+is to assist developers in fixing timing vulnerabilities in their code. The user provides a sample
+Java program and specific class/method, and \jcupid will test for timing vulnerabilities. \jcupid would then choose various
+inputs to give to the program and examine the bytecodes that are executed using our modified OpenJDK.
 
-As opposed to timing the the run of the program \jcupid actually analyses the bytecodes that the program
-executes, the idea being that a given program should do exactly the same instructions for all input.
+As opposed to timing the run of the program, \jcupid actually analyses the bytecodes that the program
+executes. The main idea is that functions free of side-channels should execute exactly the same instructions for any input.
 
 \jcupid achieves this by using some functionality of the debug version of the OpenJDK as well as some
 modifications that were made. Namely \jcupid will provide OpenJDK with the name of the class and method
 the user is interested in, then from the time that the method begins execution until it returns OpenJDK
-will run a quick hash of all of the bytecodes that are executed. This provides a quick way of determining
-whether the inputs are doing different work, if they produce different hashes, then \jcupid will dive 
-in more in depth into those executions, but inputs that lead to the same hash do not need extra time
-spent on them. As mentioned after different hashes are produced by inputs those inputs are provided
-to the program again with different flags for OpenJDK that will provide a list of all the bytecodes 
-executed (in order). Then \jcupid will then compare those outputs to find the bytecode that is different
-and finally work to find the line of source code that presented this difference.
+will run a fast hash of all of the bytecodes that are executed. This provides a quick way of determining
+whether the inputs are executing different bytecodes. If they produce different hashes, then \jcupid will dive 
+in more in depth into those executions, but inputs that result in the same hash do not need extra processing time.
+For those inputs that produce different hashes, our tool reruns the program with those inputs, this time
+flags that instruct our modified OpenJDK to provide the full list of bytecodes
+executed. Then, \jcupid will compare the bytecodes run for the differing inputs, and find the first divergence.
+\jcupid will then determine the line of source code that is responsible for this difference, and report it to the user.
 
-When calling \jcupid the user must provide certain information namely: the filename of the java program,
+When calling \jcupid the user must provide certain information, namely: the filename of the java program,
 the name of the class and method that the user is interested in testing, the length of inputs to provide
-to the program and the maximum number of iterations to run. Thus a potential call to \jcupid would look
-as such:
+to the program and the maximum number of iterations to run. Thus a potential call to \jcupid would look like:
 
 \begin{center}
   \includegraphics[width=\linewidth]{jCupidCall}
 \end{center}
 
-Which tells \jcupid that it should use at most 6 random strings of length 5 to run the file PasswordChecker.java
+This tells \jcupid that it should use at most 6 random strings of length 5 to run the file PasswordChecker.java
 and to examine the method checkPass in the class PasswordChecker. A quick look at that function tells us how
 it will check passwords:
 
@@ -47,14 +46,14 @@ vs ones that don't. Lets see how \jcupid handles this:
   \includegraphics[width=\linewidth]{jCupidRun1}
 \end{center}
 
-Here we see that \jcupid tells us what it is inputting. The first input is ``VNzmP'', the first character
-isn't `m' so we know it will fail immediately. \jcupid then shows the output from the program and some
+Here we see that \jcupid tells us what it is inputting. The first input is ``VNzmP''. Since the first character
+isn't `m', it will fail immediately. \jcupid then shows the output from the program and some
 diagnostic output including how many bytecodes were executed and the result of the hash. The second input
 is ``8A0cG'' which again should fail immediately and we can see it has the same hash and moves on to the
-next input. The third input is ``mEL1G'', this input should lead us down a different path since the first
+next input. The third input is ``mEL1G''; this input should lead us down a different path since the first
 character matches the first character of our password. Indeed we can see that the hash for this input is
 different. This prompts \jcupid to now look for the offending bytecode and trace this back to a line in 
-the source code, in this case it tells us line 21 is the offending line, which we can see is the line of
+the source code. In this case, it tells us line 21 is the offending line, which is the line of
 the \texttt{if} statement.
 
 The now informed developer can recognize their mistake and fix this code! One common way of ``correctly''
@@ -73,26 +72,27 @@ with the exact same line of code no matter what. Lets see what \jcupid says:
 \end{center}
 
 Running the same inputs through again we see that indeed the two first inputs do the same work, as expected,
-but suprisingly we still get different bytecodes executed with this fixed solution. After much investigation
-it appears that a peculiarity of Java turns the $==$ into an if statement! Luckily we ran the code through
-\jcupid again. After some clever thinking we may realize that we need to do this checking without actually
-comparing the characters, but we can do a computation on them. Specifically we can xor each character to
-determine if they are the same, and then keep a running \texttt{or} to keep track of any differences showing
-up. So the code now looks like:
+but surprisingly, we still get different bytecodes executed with this fixed solution. After much investigation
+it appears that a peculiarity of Java turns the $==$ into an if statement. Luckily, we ran the code through
+\jcupid again to verify our fix. After some clever thinking, we may realize that we need to do this checking without actually
+comparing the characters, but we can do a computation on them. Specifically, we can exclusive-or each character with
+the password's respective characters to
+determine if they are the same, and then keep a running \texttt{or} to keep track of any differences.
+So the code now looks like:
 
 \begin{center}
   \includegraphics[width=\linewidth]{PasswordCheckerFix2}
 \end{center}
 
-Now there are no decisions being made at all in the code, just a computation being done, and the same 
-computation. Lets see if \jcupid agrees with us:
+Now there are no decisions being made at all in the code, just the same computation being done in each iteration
+of the loop. Lets see if \jcupid agrees with us:
 
 \begin{center}
   \includegraphics[width=\linewidth]{jCupidRun3}
 \end{center}
 
 Indeed we can see that \jcupid found no difference between any of the inputs, regardless of whether they 
-began the same as the password. Of course we would want to run significantly more trials on numerous 
+began the same as the password. Of course, we would want to run significantly more trials on numerous 
 length inputs in order to be more confident, but we can see that we have fixed our problem of matching
 letters causing different instructions to be executed. Even though the first solution we had seemed like
 it was exactly what we wanted, Java's compiler changes the code in subtle ways that can add side-channels.
@@ -114,10 +114,18 @@ this? Lets see what \jcupid thinks:
 It appears that all is well! \jcupid doesn't notice any difference by using Java's built-in string comparison!
 However after some investigation: a significant portion of Java's built-in calls are implemented in \texttt{C++}
 meaning that \jcupid can't detect any differences, since it only looks at the bytecodes that Java executes. And
-in fact Java's built-in methods are not designed to be used in secure applications.
+in fact Java's built-in methods are not designed to be used in secure
+applications. To address this, we could instrument \jcupid to allow use to
+annotate which methods implemented natively in \texttt{C++} have data-dependent
+side-channels (such as this function). We could even potentially extend \jcupid
+to automatically determine and annotate these functions for us by performing
+similar analysis on the x86 generated from the native functions. For now, we
+will simply have to know about this subtlety when using the tool.
 
-We provide another example: sometimes users code may not have any branches at all, but still input has an effect
-on what is computed. In certain situations some inputs can cause more work to be done. In particular consider
+On more example: sometimes users code may not have any branches at all, but
+still different inputs can have an effect
+on what is computed. For example, some inputs might cause more work to be done
+than other inputs. In particular, consider
 the contrived program that reads a string from input and then sums the characters of the string to determine
 how many bytes to read from a file and then hash.
 
@@ -154,4 +162,8 @@ the following structure:
 Line 34 corresponds to the \texttt{md.digest(data)} line, which tells us that something is wrong with our
 hashing. Of course the issue come from the inputs: \texttt{44LUF} sums to 335 and \texttt{BvHBJ} sums to 
 396, thus the first run of our program hashes 335 bytes of data where as the second run hashes 396 bytes,
-which leads to a different number of bytecodes executed.
+which leads to a different number of bytecodes executed. This difference would
+be difficult to spot in code normally: there are no branches in the code, and
+it would be easy to expect that this program runs the same bytecodes each time.
+However, \jcupid is able to see past this and determine the needed inputs that
+prove this assumption wrong.
