@@ -1,5 +1,7 @@
+import java.lang.Integer;
 import java.lang.Long;
 import java.lang.Math;
+import java.math.BigInteger;
 import java.util.Scanner;
 
 public class repeatedSquaring
@@ -10,6 +12,21 @@ public class repeatedSquaring
 
         for(int i = 0; i < str.length(); i++)
             ans += (long) ((int)(str.charAt(i)-32))*Math.pow(base,i);
+
+        return ans;
+    }
+
+    public static BigInteger stringToBigInt(String str,int base)
+    {
+        BigInteger ans = new BigInteger("0");
+
+        for(int i = 0; i < str.length(); i++)
+        {
+            BigInteger ch = new BigInteger(Integer.toString((int)(str.charAt(i)-32)));
+            BigInteger power = new BigInteger(Integer.toString(base));
+            power = power.pow(i);
+            ans = ans.add(ch.multiply(power));
+        }
 
         return ans;
     }
@@ -30,6 +47,31 @@ public class repeatedSquaring
 
             base = base*base % mod;
             power/= 2;
+        }
+
+        return R;
+    }
+
+    public static BigInteger BigRepeatedSquare(BigInteger base, BigInteger power, BigInteger mod)
+    {
+        BigInteger R = new BigInteger("1");
+        BigInteger two = new BigInteger("2");
+
+        //System.out.println("intial power = " + power);
+        if (power.compareTo(BigInteger.ZERO) == 0)
+            return BigInteger.ONE;
+        else if (power.compareTo(BigInteger.ONE) == 0)
+            return base;
+
+        while (power.compareTo(BigInteger.ZERO) > 0) // this means power > 0
+        {
+            BigInteger powerMod = power.mod(two);
+            //System.out.println("power = " + power);
+            if (powerMod.compareTo(BigInteger.ONE) == 0)
+                R = R.multiply(base).mod(mod);
+
+            base = base.multiply(base).mod(mod);
+            power = power.divide(two);
         }
 
         return R;
@@ -62,18 +104,22 @@ public class repeatedSquaring
         String s = sc.nextLine();
 
         long num = stringToLong(s,96);
-
+        BigInteger BigNum = stringToBigInt(s,96);
 
         int prime = 2357;
+        BigInteger BigPrime = new BigInteger("2357");
         //int prime = 5;
         int g = 1415;
+        BigInteger BigG = new BigInteger("1415");
         //int g = 2;
 
         int res = repeatedSquare(g,num,prime);
+        BigInteger BigRes = BigRepeatedSquare(BigG,BigNum,BigPrime);
         long res2 = montLadder(g, num, prime);
 
         System.out.println("num = " + num);
-        System.out.println("res = " + res);
-        System.out.println("res2= " + res2);
+        //System.out.println("res = " + res);
+        //System.out.println("BigRes = " + BigRes);
+        //System.out.println("res2= " + res2);
     }
 }
