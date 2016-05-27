@@ -37,7 +37,7 @@ the \texttt{-XX:+TraceBytecodes} flag.
 With this feature, our python wrapper can simply generate inputs, and receive
 the hash of the bytecodes executed in the relevant class/method for that input.
 Once the python script determines two inputs that produce different hashes, it
-knows the execution has divereged. The script then follows up by using the
+knows the execution has diverged. The script then follows up by using the
 slower \texttt{-XX:+TraceBytecodes} flag on both instances of the program, and
 compares their outputs to detect the deviation. 
 

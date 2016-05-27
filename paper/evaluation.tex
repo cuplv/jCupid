@@ -28,7 +28,7 @@ We implemented the straightforward method for modular exponentiation shown in
 Algorithm~\ref{alg:expo}. This algorithm has a side-channel dependent on the
 (private) exponent input. To compare against a side-channel-free version,
 we also implemented a variant on the Montgomery Ladder
-technique for modular exponentiation. However, we had to use algebric tricks to
+technique for modular exponentiation. However, we had to use algebraic tricks to
 replace the branches that are present in the algorithm. Our updated version has no
 data-dependent branches, and relies only on multiplication, addition,
 subtraction, and modulo.
@@ -75,7 +75,7 @@ in order to find side-channel behavior. We evaluated \jcupid's overhead by
 measuring how quickly it can run basic Java programs, and compared it to
 running those same programs outside of the \jcupid environment. Particularly for
 a developer dynamic analysis tool that inspects individual bytecodes, our
-results are encouraging: per run, \jcupid only adds on average approximatly 2x
+results are encouraging: per run, \jcupid only adds on average approximately 2x
 overhead. This could allow even rare side-channels to be detected with
 na\"{\i}ve fuzzing of nightly builds over unit tests.
 
