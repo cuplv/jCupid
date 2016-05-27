@@ -8,14 +8,14 @@ sequence of bytecodes to be executed, \jcupid can inform the developer
 of the line that caused the
 divergence. We show that in this way \jcupid can detect side channel
 bugs using a series of case studies (and we show that \jcupid does not
-detect bugs in these corrected versions).
+detect bugs in the corrected versions).
 
 This tool is intended to be used by developers to test very
 specific aspects of their code. Running \jcupid on even moderately sized
 projects, say an authetication server, will most
 certainly find different bytecodes executed based on input (even of
 the same length). \jcupid is intended as a more precise tool. Instead of 
-analyzing the whole server, to continue the analogy, the tool is
+analyzing the whole server, the tool is
 intended to analyze whether the modular exponentiation function
 executes different bytecodes for inputs of the same size (and thus for
 instance reveals information about bits in the secret key). 
