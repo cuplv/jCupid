@@ -46,7 +46,7 @@ compares their outputs to detect the deviation.
 
 \subsection{Inputs}
 
-jCupid chooses inputs automatically, attempting to find two inputs that produce
+\jcupid chooses inputs automatically, attempting to find two inputs that produce
 different execution traces. \jcupid can generate inputs in two ways. First, it
 can generate a random string input, such as the ones used for our sample
 programs. Second, \jcupid can work with jCute, a concolic execution testing tool
@@ -121,7 +121,7 @@ cause it to diverge there.
 %their code~\cite{vallee1999soot}. However a bytecode (or timing) difference can
 %occur in a library call and as such we need to dynamically analyze bytecodes
 %that are executed on each run. The OpenJDK project is an open-source version of
-%Oracle's JDK. This was key for jCupid due to certain flags for the JDK
+%Oracle's JDK. This was key for \jcupid due to certain flags for the JDK
 %(\texttt{-XX:+TraceBytecodes}) are only allowed in develop versions of the JDK,
 %compiled with a debug flag. The release version of the JDK does not allow the
 %use of this flag, however compiling OpenJDK with the debug flag allowed us
@@ -134,7 +134,7 @@ cause it to diverge there.
 %
 %The above projects are great tools, but do not solve the problem at hand, which
 %is to pinpoint which bytecode, or line of code causes a program do different
-%work for different inputs. This is what jCupid attempts to help solve with the
+%work for different inputs. This is what \jcupid attempts to help solve with the
 %aid, or incite of the above projects. 
 %
 %\begin{figure}[t]
