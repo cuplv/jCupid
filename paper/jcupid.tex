@@ -1,6 +1,6 @@
 
-\jcupid consists of a python script that wraps a modified version of OpenJDK.
-Our python wrapper runs a specified program multiple times through our modified
+\jcupid consists of a Python script that wraps a modified version of OpenJDK.
+Our Python wrapper runs a specified program multiple times through our modified
 OpenJDK, looking for two inputs that provide different bytecodes executed. We
 have several optimizations to make this performant, which we detail in this
 section.
@@ -10,7 +10,7 @@ section.
 
 While OpenJDK already provides a feature for printing out executed bytecodes in
 debug mode (with the \texttt{-XX:+TraceBytecodes} flag), we found that using
-this feature for our tool proved to be significantly too slow. In addition,
+this feature for our tool proved to be decidedly too slow. In addition,
 this prints out a large number of bytecodes used in the initialization and
 startup of the program. For example, a simple ``Hello World'' program executes
 1.18 million bytecodes, while only 6,054 of those bytecodes are actually within
@@ -34,9 +34,9 @@ the method specified by the user. With these two features, a simple ``Hello
 World'' program can be run in about 0.8 seconds, ten times faster than using
 the \texttt{-XX:+TraceBytecodes} flag.
 
-With this feature, our python wrapper can simply generate inputs, and receive
+With this feature, our Python wrapper can simply generate inputs, and receive
 the hash of the bytecodes executed in the relevant class/method for that input.
-Once the python script determines two inputs that produce different hashes, it
+Once the Python script determines two inputs that produce different hashes, it
 knows the execution has diverged. The script then follows up by using the
 slower \texttt{-XX:+TraceBytecodes} flag on both instances of the program, and
 compares their outputs to detect the deviation. 
