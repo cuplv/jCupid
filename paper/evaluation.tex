@@ -31,7 +31,7 @@ we also implemented a variant on the Montgomery Ladder
 technique for modular exponentiation. However, we had to use algebraic tricks to
 replace the branches that are present in the algorithm. Our updated version has no
 data-dependent branches, and relies only on multiplication, addition,
-subtraction, and modulo.
+subtraction, and modulus operations.
 
 
 \paragraph{SumBytes}
@@ -61,8 +61,8 @@ We then corrected the problems identified by \jcupid, and reran our tool to
 verify we had removed the offending side-channels. To our surprise, \jcupid
 identified additional problems in some of our ``corrected'' programs. For example, in
 the password checking program, we used a temporary value, and updated it at each
-iteration with $ good \&= (input[i] == expected[i]) $. However, this resulted in
-a side-channel when computing the $ == $ operator, as Java implemented this as a
+iteration with \texttt{good \&= (input[i] == expected[i])}. However, this resulted in
+a side-channel when computing the \texttt{==} operator, as Java implemented this as a
 branch in the bytecode. We fixed this by switching to using exclusive-or to
 compare the values, and \jcupid did not detect any additional side-channels. This
 further illustrates the difficulty of removing all potential side-channels from
@@ -90,11 +90,11 @@ is obviously variable based on the input program: for longer running and more
 computationally-expensive programs, \jcupid's overhead is lower.
 
 To determine which components of \jcupid are responsible for its overhead, we
-removed individual components and reran our programs. We ran our python tool in
+removed individual components and reran our programs. We ran our Python tool in
 a way that it called a normal OpenJDK rather than our modified (debug) one, and
 found that it took on average 3.6 seconds per run. We then ran our tool using a
 modified version of OpenJDK that did not use hashing, and found it takes 4.8
-seconds. Thus, we estimate that our python tool adds about half of the overhead
+seconds. Thus, we estimate that our Python tool adds about half of the overhead
 of \jcupid,
 with the remainder coming mainly from the debug version of OpenJDK, and a small
 contribution from the fast hash function itself.

@@ -36,7 +36,7 @@
   removing a particular class of side channels from their code.
   \jcupid dynamically tests Java programs for timing side channels by examining
   the sequence of bytecodes that are executed for multiple inputs of the same size.
-  Our tool optimizes this process by first computing only hashes of bytecode sequences,
+  \jcupid optimizes this process by first computing only hashes of bytecode sequences,
   so that comparing the full sequences becomes necessary only when a side-channel has been detected.
   Once two inputs are found that cause a different sequence of bytecodes to be
   executed, \jcupid can inform the developer of the offending line of source code
