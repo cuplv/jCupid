@@ -11,41 +11,9 @@ import sys
 
 """This script is the main user interaction for the tool. They will provide a class name, a path to the .java file and a method name. Using this we will call jCute to determine what inputs reach different paths. Then using those inputs on the modified jdk to determine their hash value. If there is ever two different hashes then run those inputs looking for the first difference in bytecode and backtrack to a line number."""
 
-# JCUTEDIR = "/home/ian/Documents/jcute/"
 OPENJDKDIR = "/home/ian/Documents/OpenJDK-fork/build/linux-x86_64-normal-server-fastdebug/jdk/bin/"
 TOOLDIR = "/home/ian/Documents/bytecode-tool/"
 
-
-# def jcute(path,fileName, className):
-    # """This function will call jcutec and jcute to determine which inputs will lead down different paths."""
-
-    # if path[-1] != "/":
-        # path += "/"
-    # p = subprocess.Popen([JCUTEDIR+"jcutec",path,fileName,className,"-sequential"],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-
-    # (out,err) = p.communicate()
-    # ret = p.returncode
-
-    # if err:
-        # sys.stderr.write("An error occurred running jcutec:\n")
-        # sys.stderr.write(err)
-        # sys.stderr.write("\n")
-        # sys.stderr.write("Please fix these errors first\n")
-        # sys.exit()
-    # else:
-        # sys.stderr.write(out)
-        # sys.stderr.write("\n")
-
-    # p = subprocess.Popen([JCUTEDIR+"jcute",className,"-i","100"],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-
-    # (out,err) = p.communicate()
-    # ret = p.returncode
-
-    # sys.stderr.write("Error output from jcute, these might be jcute providing input that causes your program to error\n")
-    # sys.stderr.write(err)
-    # sys.stderr.write("\nRest of the output of jcute:\n")
-    # sys.stderr.write(out)
-    # sys.stderr.write("\n")
 
 
 def hasDifference(someList):
@@ -57,16 +25,13 @@ def hasDifference(someList):
 
     return None
 
-def randomString(size,chars=string.letters + string.digits):
+def randomString(size,chars=string.letters+string.digits+string.punctuation):
     """This will create a random string of given size."""
-    return ''.join(random.SystemRandom().choice(chars) for _ in range(size))
+    return ''.join(random.choice(chars) for _ in range(size))
 
-def hashJDK(fileName,mainClassName,stripClassName,methodName,strLen, its):
+def hashJDK(fileName,mainClassName,stripClassName,methodName,strLen, its,usrInput):
     """This function will run the modified openJDK fork with the inputs from jcute."""
 
-    # f = open(JCUTEDIR+"tmpjcute/cuteInputLog","r")
-    # data = f.readlines()
-    # f.close()
 
     #compile the file
 
@@ -85,9 +50,13 @@ def hashJDK(fileName,mainClassName,stripClassName,methodName,strLen, its):
     inputs = [None]*its
     ret = None
     for i in range(its):
-        inputs[i] = randomString(strLen)
-        print("input = " + inputs[i])
+        if usrInput:
+            inputs[i] = usrInput
+        else:
+            inputs[i] = randomString(strLen)
+        print("\ninput = " + inputs[i])
         p = subprocess.Popen([OPENJDKDIR+"java","-XX:+TraceBytecodes","-Xint","-hashClass="+stripClassName,"-hashMethod="+methodName, mainClassName],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+        # p = subprocess.Popen([OPENJDKDIR+"java", mainClassName],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
         p.stdin.write(inputs[i]+ "\n")
         (out,err) = p.communicate()
 
@@ -125,8 +94,8 @@ def traceJDK(mainClassName,stripClassName,methodName,inps):
     (out1,err1) = p.communicate()
 
     if err1:
-        sys.stderr.write("There was an error running the program with -traceClass and traceMethod")
-        sys.exit()
+        sys.stderr.write("There was an error running the program with -traceClass and traceMethod:\n")
+        sys.stderr.write(err1)
 
     if out1:
         f = open(TOOLDIR+"out1","w")
@@ -139,8 +108,8 @@ def traceJDK(mainClassName,stripClassName,methodName,inps):
     (out2,err2) = p.communicate()
 
     if err2:
-        sys.stderr.write("There was an error running the program with -traceClass and traceMethod")
-        sys.exit()
+        sys.stderr.write("There was an error running the program with -traceClass and traceMethod:\n")
+        sys.stderr.write(err2)
 
     if out2:
         f = open(TOOLDIR+"out2","w")
@@ -155,24 +124,31 @@ def findFirstDiff(outputs,className,methodName):
 
     first = None
     for i,j in zip(enumerate(outputs[0]),enumerate(outputs[1])):
-        if i != j:
+        if i[1] != j[1]:
+            if "bytecodes executed in" in i or "BytecodeCounter::counter_value" in i:
+                continue
+            f = open("tmp","w")
+            for line in outputs[0]:
+                f.write(line + "\n")
+            f.close()
+            f = open("tmp2","w")
+            for line in outputs[1]:
+                f.write(line + "\n")
+            f.close()
+            
             divLine = i[0]
             break
     
     # now we have the first place they differ, need to back trace to find last place the given class.method is referenced.
 
     searchString = className + "." + methodName
-    searchStringLine = next(i for i,v in reversed(list(enumerate(outputs[0][:divLine]))) if className in v)
+    searchStringLine = next(i for i,v in reversed(list(enumerate(outputs[0][:divLine]))) if searchString in v)
 
     # now we see if there is a blank line between these lines, if not then the first line we found is the line to compare to javap, if there is we need to take the line before the first blank line
 
     lineDist = next((i for i,v in enumerate(outputs[0][searchStringLine:divLine]) if v == ""),divLine-searchStringLine)-1
 
     return outputs[0][searchStringLine + lineDist]
-    # if importantLine == 0:
-        # return outputs[0][divLine]
-    # else:
-        # return ouputs[0][divLine + importantLine]
 
 
 def crossRef(mainClassName,stripClassName,methodName,relByte):
@@ -188,21 +164,24 @@ def crossRef(mainClassName,stripClassName,methodName,relByte):
         sys.exit()
 
     if out:
-        out = out.split("\n")
+        if methodName in out:
+            out = out.split("\n")
 
-        methodTrace = out[next(i for i,v in enumerate(out) if methodName in v):]
+            methodTrace = out[next(i for i,v in enumerate(out) if methodName in v):]
 
-        for i in range(len(methodTrace)):
-            if ": " not in methodTrace[i]:
-                continue
+            for i in range(len(methodTrace)):
+                if ": " not in methodTrace[i]:
+                    continue
 
-            if int(methodTrace[i][methodTrace[i].find(": ") +2:]) < relByte:
-                continue
-            else:
-                break
+                if int(methodTrace[i][methodTrace[i].find(": ") +2:]) < relByte:
+                    continue
+                else:
+                    break
 
 
-        print("Divergence happens at: " + methodTrace[i-1].strip()[:methodTrace[i-1].strip().find(":")])
+            print("\nDivergence happens at: " + methodTrace[i-1].strip()[:methodTrace[i-1].strip().find(":")])
+        else:
+            print("\nOffending method was not defined in given source code.")
                 
 
 
@@ -210,13 +189,13 @@ def main():
     """This will handle all of the flags and then execute jcute and the jdk"""
 
     parser = OptionParser()
-    # parser.add_option("-p", "--path", dest="path",help="Must have the source path to the .java file to compile",metavar="PATH")
     parser.add_option("-f", "--filename", dest="filename",help="Must have the full path including the .java file",metavar="FILE")
     parser.add_option("-c", "--mainclass", dest="mainClassName",help="class name that contains main method", metavar="MAINCLASS")
     parser.add_option("-n", "--stripclass", dest="stripClassName", help="class name that contains method to hash around, if not included uses mainclass input",metavar="STRIPCLASS")
     parser.add_option("-m", "--methodname", dest="methodName", help="method name to hash around",metavar="METHODNAME")
     parser.add_option("-l", "--length", dest="stringLength",type="int",help="length of input strings to program",metavar="STRINGLENGTH")
     parser.add_option("-i", "--iterations", dest="iterations",type="int",help="maximum number of iterations to try",metavar="MAXITERATIONS")
+    parser.add_option("-k", "--input", dest="inp", help="provide input to program", metavar="INPUT")
 
     (options,args) = parser.parse_args()
 
@@ -238,13 +217,17 @@ def main():
     if options.stripClassName == None:
         # was not used, so make it the mainClassName
         options.stripClassName = options.mainClassName
+    
+    userInput = None
+    if options.inp:
+        userInput = options.inp
 
 
-    # jcute(options.path,options.filename,options.mainClassName)
+    # random.seed(23)
 
-    r = hashJDK(options.filename,options.mainClassName,options.stripClassName,options.methodName,options.stringLength,options.iterations)
+    r = hashJDK(options.filename,options.mainClassName,options.stripClassName,options.methodName,options.stringLength,options.iterations,userInput)
     if r:
-        sys.stderr.write("inputs that produce different hashes: " + str(r) + "\n")
+        sys.stderr.write("\ninputs that produce different hashes: " + str(r) + "\n")
         outs = traceJDK(options.mainClassName,options.stripClassName,options.methodName,r)
 
         outs = (outs[0].split("\n"),outs[1].split("\n"))
@@ -255,7 +238,7 @@ def main():
         # now we get the cross reference material from javap
         crossRef(options.mainClassName,options.stripClassName,options.methodName, relativeByte)
     else:
-        print("jCupid could not find inputs to cause different executed bytecodes")
+        print("\n\njCupid could not find inputs to cause different executed bytecodes")
 
         
 
