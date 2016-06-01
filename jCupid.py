@@ -11,8 +11,7 @@ import sys
 
 """This script is the main user interaction for the tool. They will provide a class name, a path to the .java file and a method name. Using this we will call jCute to determine what inputs reach different paths. Then using those inputs on the modified jdk to determine their hash value. If there is ever two different hashes then run those inputs looking for the first difference in bytecode and backtrack to a line number."""
 
-OPENJDKDIR = "/home/ian/Documents/OpenJDK-fork/build/linux-x86_64-normal-server-fastdebug/jdk/bin/"
-TOOLDIR = "/home/ian/Documents/bytecode-tool/"
+OPENJDKDIR = "OpenJDK/build/linux-x86_64-normal-server-fastdebug/jdk/bin/"
 
 
 
@@ -98,7 +97,7 @@ def traceJDK(mainClassName,stripClassName,methodName,inps):
         sys.stderr.write(err1)
 
     if out1:
-        f = open(TOOLDIR+"out1","w")
+        f = open("out1","w")
         f.write(out1)
         f.close()
 
@@ -112,7 +111,7 @@ def traceJDK(mainClassName,stripClassName,methodName,inps):
         sys.stderr.write(err2)
 
     if out2:
-        f = open(TOOLDIR+"out2","w")
+        f = open("out2","w")
         f.write(out2)
         f.close()
 
