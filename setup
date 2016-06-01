@@ -1,0 +1,9 @@
+#! /usr/bin/env bash
+
+git clone https://github.com/cuplv/OpenJDK.git
+
+cd OpenJDK
+
+./configure --enable-debug --with-target-bits=64
+
+make all
