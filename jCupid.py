@@ -34,7 +34,7 @@ def hashJDK(fileName,mainClassName,stripClassName,methodName,strLen, its,usrInpu
 
     #compile the file
 
-    p = subprocess.Popen([OPENJDKDIR+"javac", fileName],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+    p = subprocess.Popen([OPENJDKDIR+"javac", fileName,"-d","."],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
     (out,err) = p.communicate()
 
     if err:
