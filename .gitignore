@@ -21,6 +21,18 @@ outputFiles
 # ignore pdfs #
 README.pdf
 
+# ignore tex files
+*.aux
+*.bbl
+*.blg
+*.log
+*.pdf
+*.out
+
+# ignore jCute things:
+cuteCopy/
+cutec/
+
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 
