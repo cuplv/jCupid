@@ -28,6 +28,8 @@ public class repeatedSquaring
             ans = ans.add(ch.multiply(power));
         }
 
+        ans.setBit(1024);
+
         return ans;
     }
 
@@ -65,9 +67,9 @@ public class repeatedSquaring
 
         while (power.compareTo(BigInteger.ZERO) > 0) // this means power > 0
         {
-            BigInteger powerMod = power.mod(two);
+            //BigInteger powerMod = power.mod(two);
             //System.out.println("power = " + power);
-            if (powerMod.compareTo(BigInteger.ONE) == 0)
+            if (power.testBit(0))
                 R = R.multiply(base).mod(mod);
 
             base = base.multiply(base).mod(mod);
@@ -98,6 +100,36 @@ public class repeatedSquaring
         return x1;
     }
 
+    public static BigInteger BigMontLadder(BigInteger base, BigInteger power, BigInteger mod)
+    {
+        BigInteger x1 = base;
+        BigInteger x2 = base.multiply(base);
+        BigInteger bit_set;
+        BigInteger t_x1;
+        BigInteger t_x2;
+        BigInteger started = new BigInteger("0");
+        int i = power.bitLength()-1;
+        for (; i>=0; i--) {
+
+            bit_set = power.shiftRight(i).and(BigInteger.ONE);
+            //int bit_set = ((int)(power >> i) & 0x01);
+
+            t_x1 = (BigInteger.ONE.add(bit_set.negate())).multiply(x1.multiply(x1)).add(bit_set.multiply(x1.multiply(x2)));
+            //long t_x1 = ((1-bit_set)*(x1*x1)) + (bit_set)*(x1*x2);
+            t_x2 = (BigInteger.ONE.add(bit_set.negate())).multiply(x1.multiply(x2)).add(bit_set.multiply(x2.multiply(x2)));
+            //long t_x2 = ((1-bit_set)*(x1*x2)) + (bit_set)*(x2*x2);
+
+            x1 = (BigInteger.ONE.add(started.negate())).multiply(x1).add(started.multiply(t_x1.mod(mod)));
+            //x1 = (1-started)*x1 + started*(t_x1 % mod);
+            x2 = (BigInteger.ONE.add(started.negate())).multiply(x2).add(started.multiply(t_x2.mod(mod)));
+            //x2 = (1-started)*x2 + started*(t_x2 % mod);
+
+            //started |= (bit_set);
+            started = started.or(bit_set);
+        }
+        return x1;
+    }
+
     public static void main(String [] args)
     {
         Scanner sc = new Scanner(System.in);
@@ -116,10 +148,12 @@ public class repeatedSquaring
         int res = repeatedSquare(g,num,prime);
         BigInteger BigRes = BigRepeatedSquare(BigG,BigNum,BigPrime);
         long res2 = montLadder(g, num, prime);
+        BigInteger BigRes2 = BigMontLadder(BigG,BigNum,BigPrime);
 
-        System.out.println("num = " + num);
+        //System.out.println("num = " + num);
         //System.out.println("res = " + res);
         //System.out.println("BigRes = " + BigRes);
         //System.out.println("res2= " + res2);
+        //System.out.println("BigRes2 = " + BigRes2);
     }
 }

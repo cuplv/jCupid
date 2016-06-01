@@ -26,6 +26,20 @@ public class SumRandomBytes
         return d;
     }
 
+    public static void doHash(byte[] data)
+    {
+        try 
+        {
+            MessageDigest md = MessageDigest.getInstance("SHA-1");
+            md.digest(data);
+        }
+        catch(NoSuchAlgorithmException e)
+        {
+            System.out.println(e);
+            System.exit(3);
+        }
+    }
+
     public static void main(String[] args)
     {
         Scanner sc = new Scanner(System.in);
@@ -33,6 +47,7 @@ public class SumRandomBytes
         String s = sc.nextLine();
         
         int sumOfBytes = sumString(s);
+        System.out.println("Sum = " + sumOfBytes);
 
         byte[] data = new byte[sumOfBytes];
         try
@@ -51,16 +66,8 @@ public class SumRandomBytes
         }
         // at this point data is full of random stuff, so now hash it!
         
-        try 
-        {
-            MessageDigest md = MessageDigest.getInstance("SHA-1");
-            md.digest(data);
-        }
-        catch(NoSuchAlgorithmException e)
-        {
-            System.out.println(e);
-            System.exit(3);
-        }
+        doHash(data);
+        
         
     }
 }

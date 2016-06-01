@@ -1,4 +1,4 @@
-
+import java.util.Scanner;
 
 public class Mux
 {
@@ -25,14 +25,20 @@ public class Mux
 
 
     public static void main(String[] args) {
-        if (args.length < 1) {
-            System.out.println("Error: requires an argument");
-        }
+        //if (args.length < 1) {
+            //System.out.println("Error: requires an argument");
+        //}
+        
+        Scanner sc = new Scanner(System.in);
+        String inp = sc.nextLine();
 
-        System.out.println(args[0]);
-        char a = args[0].charAt(0);
-        char b = args[0].charAt(1);
-        char s_chr = args[0].charAt(2);
+        //System.out.println(inp);
+        //char a = args[0].charAt(0);
+        //char b = args[0].charAt(1);
+        //char s_chr = args[0].charAt(2);
+        char a = inp.charAt(0);
+        char b = inp.charAt(1);
+        char s_chr = inp.charAt(2);
         boolean s = (((int)s_chr & 1) == 1);
 
         System.out.println(Mux.select_side_channel(a, b, s));

@@ -114,7 +114,7 @@ public class Lucky13
             boolean goodMAC;
             Mac mac2 = Mac.getInstance(MACKey.getAlgorithm());
             mac2.init(MACKey);
-            System.out.println("goodPadding = " + goodPadding);
+            //System.out.println("goodPadding = " + goodPadding);
             byte[] supposedDigest = Arrays.copyOfRange(pText,
                     pTextSize-subTerm-20,pTextSize-subTerm);
             byte[] message = Arrays.copyOfRange(pText,0,
@@ -123,7 +123,7 @@ public class Lucky13
             //System.out.println(Arrays.toString(supposedDigest));
             //System.out.println(Arrays.toString(actualDigest));
             goodMAC = Arrays.equals(supposedDigest,actualDigest);
-            System.out.println("goodMAC = " + goodMAC);
+            //System.out.println("goodMAC = " + goodMAC);
 
             if (goodMAC)
                 return new String(message,"UTF-8");

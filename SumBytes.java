@@ -86,10 +86,12 @@ public class SumBytes
         //if(s.length() > 0 && s.substring(0,1).equals("h"))
         {
             result = md.digest(bArray);
+            System.out.println("if");
         }
         else
         {
             result = md.digest(md.digest(bArray));
+            System.out.println("else");
         }
     }
 }
