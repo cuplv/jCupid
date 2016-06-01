@@ -12,6 +12,7 @@ The script assumes you are on a 64-bit machine, if you are on a 32-bit machine y
 ## How to use tool:
 
 Main use is through the jCupid.py script. It has a number of necessary flags: 
+
 `./jCupid -f fileName -c mainClass [-n stripClass] -m methodName -l length [-i its] [-k input]`
 
 ```
