@@ -3,9 +3,17 @@
 ## Necessary tools:
 
 In order to use jCupid you must download and compile the modified OpenJDK. This is taken care of by the setup script. It will clone our modified OpenJDK
-from `https://github.com/cuplv/OpenJDK.git` and configure and compile for you.
+from `https://github.com/cuplv/OpenJDK` and configure and compile for you.
 
 Thus after cloning this repository, you simply need to run `./setup`
+
+## Requirements:
+
+In order to install OpenJDK you will need a version of Oracles JDK 7. You can acquire that [here](http://www.oracle.com/technetwork/java/javase/downloads/index.html), this version should be in your `PATH` variable, or if it is not you should add the line `--with-boot-jdk=`*path* to the configures line in the `setup` script.
+
+Additional system requirements are `alsa`, `freetype`, `cups`, and `xrender`, these are required to build the OpenJDK and can be installed with:
+
+If any of the above are missing the configure step will and it will suggest how to install missing dependencies.
 
 The script assumes you are on a 64-bit machine, if you are on a 32-bit machine you must delete part of one line of this script. The line containing `./configure --enable-debug --with-target-bits=64`, simply remove the whole `--with-target-bits flag`
 
